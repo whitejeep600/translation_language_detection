@@ -7,14 +7,10 @@ from nltk.tag import pos_tag  # execute: nltk.download('averaged_perceptron_tagg
 from nltk import tokenize
 
 
-def contains_proper_name(sentence):
-    sentence = pos_tag(sentence.split())
-    res = any([pos == 'NNP' for _, pos in sentence])
-    return res
-
-
 def remove_proper_names(sentence):
     split_sentence = pos_tag(sentence.split())
+    # the split function will not work for languages without whitespace.
+    # not sure how to get the pos_tags for such languages to be honest
     proper_nouns = [word for word, pos in split_sentence if pos == 'NNP']
     for noun in proper_nouns:
         sentence = sentence.replace(noun, '')
@@ -47,6 +43,9 @@ def get_links_from_response(http_response):
     link_objects = parsed_response.find(id='bodyContent').find_all('a')
     bare_links = [link.get('href') for link in link_objects
                   if link.get('href') and fullmatch(r"/wiki/[a-zA-Z]*", link.get('href'))]
+                  # here I selected the alphanumeric links to avoid stupid links to .png
+                  # images etc. Will need to be adjusted, or I think it can be removed
+                  # for non-latin-alphabet languages.
     return ['https://id.wikipedia.org' + link for link in bare_links]
     # replace 'id' with the prefix of your language
 
