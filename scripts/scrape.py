@@ -44,8 +44,8 @@ def get_chunks_from_response(http_response):
 
 def get_links_from_response(http_response):
     parsed_response = BeautifulSoup(http_response.content, 'html.parser')
-    links = parsed_response.find(id='bodyContent').find_all('a')
-    bare_links = [link.get('href') for link in links
+    link_objects = parsed_response.find(id='bodyContent').find_all('a')
+    bare_links = [link.get('href') for link in link_objects
                   if link.get('href') and fullmatch(r"/wiki/[a-zA-Z]*", link.get('href'))]
     return ['https://id.wikipedia.org' + link for link in bare_links]
     # replace 'id' with the prefix of your language
@@ -70,4 +70,5 @@ if __name__ == '__main__':
     with open("indonesian.json", "w") as file:
         file.write(final_json)
     # of course replace 'indonesian' here
+
 
