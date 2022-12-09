@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from re import sub, fullmatch
 from nltk import tokenize
+from tqdm import tqdm
 
 
 def get_chunks_from_response(http_response):
@@ -24,35 +25,42 @@ def get_chunks_from_response(http_response):
             current_chunk = ''
     return chunks
 
-
+MULTIMEDIA_FORMAT = {'png', 'jpg', 'gif', 'mid', 'midi', 'ogg'}
 def get_links_from_response(http_response):
     parsed_response = BeautifulSoup(http_response.content, 'html.parser')
     link_objects = parsed_response.find(id='bodyContent').find_all('a')
     bare_links = [link.get('href') for link in link_objects
-                  if link.get('href') and fullmatch(r"/wiki/[a-zA-Z]*", link.get('href'))]
-    # here I selected the alphanumeric links to avoid stupid links to .png
-    # images etc. Will need to be adjusted, or I think it can be removed
-    # for non-latin-alphabet languages.
-    return ['https://id.wikipedia.org' + link for link in bare_links]
-    # replace 'id' with the prefix of your language
+                  if link.get('href') and link.get('href').split('.')[-1].lower() not in MULTIMEDIA_FORMAT]
+    return ['https://ar.wikipedia.org' + link for link in bare_links]
 
-
-if __name__ == '__main__':
+def main():
     all_chunks = []
     visited_sites = set()
     reachable_sites = set()
-    reachable_sites.add('https://id.wikipedia.org/wiki/Filsafat')
-    # replace the address with an article in your language
-    while len(all_chunks) < 7000:
-        http_response = requests.get(url=reachable_sites.pop())
-        new_reachable_sites = get_links_from_response(http_response)
-        for site in new_reachable_sites:
-            if site not in visited_sites:
-                visited_sites.add(site)
-                reachable_sites.add(site)
+    reachable_sites.add('https://ar.wikipedia.org/wiki/المجموعة_الشمسية')
+    
+    data_size = 7300
+    progress = tqdm(total=data_size)
+    while len(all_chunks) < data_size:
+        try:
+            http_response = requests.get(url=reachable_sites.pop())
+        except requests.ConnectionError:
+            continue
+        
+        if len(reachable_sites) < 1000:
+            new_reachable_sites = get_links_from_response(http_response)
+            for site in new_reachable_sites:
+                if site not in visited_sites:
+                    visited_sites.add(site)
+                    reachable_sites.add(site)
         for chunk in get_chunks_from_response(http_response):
             all_chunks.append(chunk)
-    final_json = json.dumps([{'paragraph': paragraph, 'language': 'indonesian'} for paragraph in all_chunks], indent=4)
-    with open("indonesian.json", "w") as file:
+            progress.update(1)
+    final_json = json.dumps([{'paragraph': paragraph.rstrip(), 'language': 'arabic'} for paragraph in all_chunks], indent=4, ensure_ascii=False)
+    with open("arabic.json", "w", encoding='utf8') as file:
         file.write(final_json)
-    # of course replace 'indonesian' here
+
+
+if __name__ == '__main__':
+    main()
+
