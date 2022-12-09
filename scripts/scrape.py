@@ -30,6 +30,9 @@ def get_links_from_response(http_response):
     link_objects = parsed_response.find(id='bodyContent').find_all('a')
     bare_links = [link.get('href') for link in link_objects
                   if link.get('href') and fullmatch(r"/wiki/[a-zA-Z]*", link.get('href'))]
+    # here I selected the alphanumeric links to avoid stupid links to .png
+    # images etc. Will need to be adjusted, or I think it can be removed
+    # for non-latin-alphabet languages.
     return ['https://id.wikipedia.org' + link for link in bare_links]
     # replace 'id' with the prefix of your language
 
