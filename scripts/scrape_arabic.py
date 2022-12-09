@@ -9,7 +9,10 @@ import random
 
 def get_chunks_from_response(http_response):
     parsed_response = BeautifulSoup(http_response.content, 'html.parser')
-    text = ' '.join([data.get_text() for data in parsed_response.find(id='bodyContent').find_all('p')])
+    content = parsed_response.find(id='bodyContent')
+    if content == None:
+        return []
+    text = ' '.join([data.get_text() for data in content.find_all('p')])
     
     # removing footnotes - they are particularly frequent in Wikipedia articles
     text = sub(r'\[[0-9\]]*', '', text)
