@@ -17,7 +17,7 @@ def query(payload):
     if len(response.json()) != 1:
         print('')
         print(response.json())
-        raise "Reponse error!"
+        raise ValueError("Reponse error!")
     return response.json()
 
 if __name__ == '__main__':
