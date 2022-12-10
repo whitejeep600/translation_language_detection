@@ -8,7 +8,7 @@ from nltk import tokenize
 ##################################################################
 
 
-API_TOKEN = "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" # YOU SHOULD GET THIS BY LOGIN HUGGINGFACE
+API_TOKEN = "" # YOU SHOULD GET THIS BY LOGIN HUGGINGFACE
 API_URL = "https://api-inference.huggingface.co/models/Helsinki-NLP/opus-mt-ar-en"
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
 
