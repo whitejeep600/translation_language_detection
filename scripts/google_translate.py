@@ -4,7 +4,7 @@ from pathlib import Path
 from googletrans import Translator
 
 if __name__ == '__main__':
-    all_paragraphs = json.loads(Path('data/original/indonesian.json').read_text())
+    all_paragraphs = json.loads(Path('data/original/indonesian/all.json').read_text())
     selected_paragraphs = all_paragraphs[:1600]
     t = Translator()
     translated_paragraphs = [{'paragraph': t.translate(paragraph['paragraph']).text,
