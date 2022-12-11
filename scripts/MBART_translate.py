@@ -1,13 +1,14 @@
 import json
 
 from tqdm import tqdm
-from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
-
+from transformers import MBartForConditionalGeneration, MBart50TokenizerFast
 
 def translate_paragraph(paragraph, tokenizer, model):
-    encoded = tokenizer(paragraph, return_tensors="pt")
-    generated_tokens = model.generate(**encoded, forced_bos_token_id=tokenizer.get_lang_id("en"))
-    return tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
+    encoded = tokenizer(paragraph, return_tensors="pt", max_length=512, truncation=True).to('cuda:0')
+    generated_tokens = model.generate(**encoded, max_length=512)
+    res =  tokenizer.batch_decode(generated_tokens, skip_special_tokens=True, max_length=512)
+    print(res)
+    return res
 
 
 def translate_paragraphs(paragraphs, tokenizer, model):
@@ -28,18 +29,19 @@ if __name__ == '__main__':
             paragraphs.append(json.loads(line))
 
     assert(len(paragraphs) == 1600 + 350)
-
-    tokenizer = M2M100Tokenizer.from_pretrained("facebook/m2m100_418M", src_lang="id")
-    model = M2M100ForConditionalGeneration.from_pretrained("facebook/m2m100_418M")
+    model_name = 'facebook/mbart-large-50-many-to-one-mmt'
+    tokenizer = MBart50TokenizerFast.from_pretrained(model_name)
+    tokenizer.src_lang = "id_ID"
+    model = MBartForConditionalGeneration.from_pretrained(model_name).to('cuda:0')
 
     translated_paragraphs = translate_paragraphs(paragraphs, tokenizer, model)
     train_paragraphs = translated_paragraphs[:1600]
     test_paragraphs = translated_paragraphs[1600:]
 
     test_json = json.dumps(test_paragraphs, indent=4)
-    with open("data/translated/from_indonesian/test_M2M100.json", "w") as file:
+    with open("data/translated/from_indonesian/test_MBART.jsonl", "w") as file:
         file.write(test_json)
 
     train_json = json.dumps(train_paragraphs, indent=4)
-    with open("data/translated/from_indonesian/train_M2M100.json", "w") as file:
-        file.write(test_json)
+    with open("data/translated/from_indonesian/train_MBART.jsonl", "w") as file:
+        file.write(train_json)
