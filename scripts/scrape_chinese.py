@@ -21,7 +21,13 @@ def get_chunks_from_response(http_response):
     text = sub(r'\[來源請求\]', '', text)
 
     # filter the text
-    if '關於維基百科' in text or '本頁面是一個維護分類' in text or '自由百科全書' in text:
+    if '本頁面是一個維護分類' in text or '自由百科全書' in text:
+        return []
+
+    if '维基百科' in text or '維基百科' in text or '優良條目評選' in text:
+        return []
+
+    if '原始文件' in text:
         return []
 
     sentences = [sentence + "。" for sentence in text.split("。")]
@@ -29,7 +35,7 @@ def get_chunks_from_response(http_response):
     current_chunk = ""
     for sentence in sentences:
         # filter the sentence
-        if '維基百科' in sentence: # if 'wikipedia' in sentence
+        if '维基百科' in sentence: # if 'wikipedia' in sentence
             continue
 
         if len(current_chunk) + len(sentence) < 256:
@@ -64,7 +70,7 @@ def main():
     reachable_sites = set()
     reachable_sites.add('https://zh.wikipedia.org/wiki/%E5%93%B2%E5%AD%A6')
 
-    data_size = 7500
+    data_size = 150
     progress = tqdm(total=data_size) # add progress bar
     while len(all_chunks) < data_size:
         try:
@@ -80,8 +86,9 @@ def main():
                     reachable_sites.add(site)
         for chunk in get_chunks_from_response(http_response):
             #print(chunk)
-            all_chunks.append(chunk)
-            progress.update(1)
+            if chunk not in all_chunks:
+                all_chunks.append(chunk)
+                progress.update(1)
 
     random.shuffle(all_chunks) # shuffle the list
     final_json = json.dumps([{'paragraph': paragraph.rstrip(), 'language': 'chinese'} for paragraph in all_chunks], indent=4, ensure_ascii=False)
