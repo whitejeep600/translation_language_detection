@@ -1,22 +1,33 @@
 import json
 
+from nltk import tokenize
 from tqdm import tqdm
 from transformers import pipeline
 
 
-def translate(paragraphs, indices, translator):
+def translate_sentence(sentence, translator):
+    if len(translator.tokenizer.tokenize(sentence)) < 256:
+        return translator(sentence, max_length=256)[0]['translation_text']
+    else:
+        return ""
+
+
+def translate_text(text, translator):
+    sentences = tokenize.sent_tokenize(text)
+    result = ' '.join([translate_sentence(sentence, translator)
+                      for sentence in sentences])
+    assert result  # making sure we didn't skip ALL sentences
+    return result
+
+
+def translate_paragraph(paragraphs, indices, translator):
     translated = []
-    skipped = 0
     progress = tqdm(total=len(indices))
     for i in indices:
-        if len(translator.tokenizer.tokenize(paragraphs[i]['translation']['in'])) < 512:
-            translated.append(
-                {'paragraph': translator(paragraphs[i]['translation']['in'], max_length=512)[0]['translation_text'],
+        translated.append(
+                {'paragraph': translate_text(paragraphs[i]['translation']['in'], translator),
                  'language': 'indonesian'})
-        else:
-            skipped += 1
         progress.update(1)
-    print(f'skipped {skipped} paragraphs which exceeded max lengthZ')
     return translated
 
 
@@ -28,12 +39,12 @@ if __name__ == '__main__':
         for line in f:
             paragraphs.append(json.loads(line))
 
-    test_paragraphs = translate(paragraphs, range(1600, 1950), translator)
+    test_paragraphs = translate_paragraph(paragraphs, range(1600, 1950), translator)
     test_json = json.dumps(test_paragraphs, indent=4)
     with open("data/translated/from_indonesian/test_helsinki.json", "w") as file:
         file.write(test_json)
 
-    train_paragraphs = translate(paragraphs, range(1600), translator)
+    train_paragraphs = translate_paragraph(paragraphs, range(1600), translator)
     train_json = json.dumps(train_paragraphs, indent=4)
     with open("data/translated/from_indonesian/train_helsinki.json", "w") as file:
         file.write(train_json)
