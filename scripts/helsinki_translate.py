@@ -28,12 +28,14 @@ if __name__ == '__main__':
         for line in f:
             paragraphs.append(json.loads(line))
 
-    train_paragraphs = translate(paragraphs,range(1600, 3200), translator)
+    test_paragraphs = translate(paragraphs, range(1600, 1950), translator)
+    test_json = json.dumps(test_paragraphs, indent=4)
+    with open("data/translated/from_indonesian/test_helsinki.json", "w") as file:
+        file.write(test_json)
+
+    train_paragraphs = translate(paragraphs, range(1600), translator)
     train_json = json.dumps(train_paragraphs, indent=4)
     with open("data/translated/from_indonesian/train_helsinki.json", "w") as file:
         file.write(train_json)
 
-    test_paragraphs = translate(paragraphs, range(3200, 3550), translator)
-    test_json = json.dumps(test_paragraphs, indent=4)
-    with open("data/translated/from_indonesian/test_helsinki.json", "w") as file:
-        file.write(test_json)
+
