@@ -33,6 +33,8 @@ def get_chunks_from_response(http_response):
             current_chunk += sentence + ' '
             chunks.append(current_chunk)
             current_chunk = ''
+            if len(chunks) == 2:
+                return chunks
     return chunks
 
 
@@ -75,6 +77,6 @@ if __name__ == '__main__':
             progress.update(1)
 
     final_json = json.dumps([{'paragraph': paragraph, 'language': 'indonesian'} for paragraph in all_chunks], indent=4)
-    with open("../data/original/indonesian/indonesian.json", "w") as file:
+    with open("../data/original/indonesian/indonesian.jsonl", "w") as file:
         file.write(final_json)
     # of course replace 'indonesian' here
