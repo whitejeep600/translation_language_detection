@@ -3,12 +3,11 @@ import json
 from tqdm import tqdm
 from transformers import MBartForConditionalGeneration, MBart50TokenizerFast
 
+
 def translate_paragraph(paragraph, tokenizer, model):
     encoded = tokenizer(paragraph, return_tensors="pt", max_length=512, truncation=True).to('cuda:0')
     generated_tokens = model.generate(**encoded, max_length=512)
-    res =  tokenizer.batch_decode(generated_tokens, skip_special_tokens=True, max_length=512)
-    print(res)
-    return res
+    return tokenizer.batch_decode(generated_tokens, skip_special_tokens=True, max_length=512)
 
 
 def translate_paragraphs(paragraphs, tokenizer, model):
