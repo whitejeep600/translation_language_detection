@@ -30,14 +30,22 @@ def get_chunks_from_response(http_response):
     if '原始文件' in text:
         return []
 
+    if '本頁面的目的僅作為編輯時針對常用語法的備忘/參考使用' in text:
+        return []
+
     sentences = [sentence + "。" for sentence in text.split("。")]
     chunks = []
     current_chunk = ""
     for sentence in sentences:
         # filter the sentence
-        if '维基百科' in sentence: # if 'wikipedia' in sentence
+        if '维基百科' in sentence or '維基百科': # if 'wikipedia' in sentence
+            continue
+        
+        if '参考资料' in sentence or '參考資料' in sentence:
             continue
 
+        
+        
         if len(current_chunk) + len(sentence) < 256:
             current_chunk += sentence
         else:
@@ -70,7 +78,7 @@ def main():
     reachable_sites = set()
     reachable_sites.add('https://zh.wikipedia.org/wiki/%E5%93%B2%E5%AD%A6')
 
-    data_size = 150
+    data_size = 7500
     progress = tqdm(total=data_size) # add progress bar
     while len(all_chunks) < data_size:
         try:
