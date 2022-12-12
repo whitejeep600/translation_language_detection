@@ -36,10 +36,10 @@ def get_chunks_from_response(http_response):
             current_chunk += sentence
         else:
             current_chunk += sentence
-            if ('维基百科' in current_chunk):
+            if ('维基百科' in current_chunk or '維基百科' in current_chunk):
                 current_chunk = ''
                 break
-            elif ('参考资料' in current_chunk):
+            elif ('参考资料' in current_chunk or '參考資料' in current_chunk):
                 current_chunk = ''
                 break
             elif ('原始文件' in current_chunk):
@@ -77,7 +77,7 @@ def main():
     reachable_sites = set()
     reachable_sites.add('https://zh.wikipedia.org/wiki/%E5%93%B2%E5%AD%A6')
 
-    data_size = 20
+    data_size = 7500
     progress = tqdm(total=data_size) # add progress bar
     while len(all_chunks) < data_size:
         try:
