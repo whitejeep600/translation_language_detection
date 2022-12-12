@@ -21,27 +21,40 @@ def get_chunks_from_response(http_response):
     text = sub(r'\[來源請求\]', '', text)
 
     # filter the text
-    if '關於維基百科' in text or '本頁面是一個維護分類' in text or '自由百科全書' in text:
+    if '自由百科全書' in text:
         return []
-
+    
     sentences = [sentence + "。" for sentence in text.split("。")]
     chunks = []
     current_chunk = ""
     for sentence in sentences:
         # filter the sentence
-        if '維基百科' in sentence: # if 'wikipedia' in sentence
-            continue
+        if (len(chunks)>=3):
+            break
 
         if len(current_chunk) + len(sentence) < 256:
             current_chunk += sentence
         else:
             current_chunk += sentence
-            if (len(chunks) < 3):
+            if ('维基百科' in current_chunk or '維基百科' in current_chunk):
+                current_chunk = ''
+                break
+            elif ('参考资料' in current_chunk or '參考資料' in current_chunk):
+                current_chunk = ''
+                break
+            elif ('原始文件' in current_chunk):
+                current_chunk = ''
+                break
+            elif ('本頁面是一個維護分類' in current_chunk):
+                current_chunk = ''
+                break
+            elif ('優良條目評選' in current_chunk):
+                current_chunk = ''
+                break
+            else:
                 chunks.append(current_chunk)
                 current_chunk = ''
-            else:
-                break
-    #print(chunks)
+    # print(chunks)
     return chunks
 
 MULTIMEDIA_FORMAT = {'png', 'jpg', 'gif', 'mid', 'midi', 'ogg'}
@@ -79,9 +92,10 @@ def main():
                     visited_sites.add(site)
                     reachable_sites.add(site)
         for chunk in get_chunks_from_response(http_response):
-            #print(chunk)
-            all_chunks.append(chunk)
-            progress.update(1)
+            # print(chunk)
+            if chunk not in all_chunks:
+                all_chunks.append(chunk)
+                progress.update(1)
 
     random.shuffle(all_chunks) # shuffle the list
     final_json = json.dumps([{'paragraph': paragraph.rstrip(), 'language': 'chinese'} for paragraph in all_chunks], indent=4, ensure_ascii=False)
