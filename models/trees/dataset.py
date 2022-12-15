@@ -13,3 +13,6 @@ class TranslationDetectionDataset(Dataset):
 
     def __getitem__(self, index) -> Dict:
         return self.data[index]
+
+    def collate_fn(self, samples: List[Dict]) -> Dict:
+        pass
