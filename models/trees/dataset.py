@@ -1,6 +1,9 @@
 from typing import List, Dict
 
+import torch
 from torch.utils.data import Dataset
+
+from translation_language_detection.models.trees.dependency_parsing import sentence_to_matrix
 
 
 class TranslationDetectionDataset(Dataset):
@@ -15,4 +18,5 @@ class TranslationDetectionDataset(Dataset):
         return self.data[index]
 
     def collate_fn(self, samples: List[Dict]) -> Dict:
-        pass
+        return {'text': torch.FloatTensor([sentence_to_matrix(sentence['text']) for sentence in samples]),
+                'label': torch.FloatTensor([self.label_mapping[sentence['language']] for sentence in samples])}

@@ -49,7 +49,7 @@ def pos_indexes_to_hot_features(pos_indices):
 
 # the first dimension corresponds to the representation features of the given word,
 # the second - to the word's position in the sentence.
-# think about this as vector representations of each word, glued together horizontally.
+# i.e. the matrix contains vector representations of each word, glued together horizontally.
 def sentence_to_matrix(sentence):
     parsed = parse_sentence(sentence)
     hot_feature_list = [pos_indexes_to_hot_features(pos_indices_for_word(parsed, i)) for i in range(len(parsed))]
