@@ -5,6 +5,8 @@ label_to_int = {
     'japanese': 3
 }
 
+NUM_LABELS = len(label_to_int)
+
 CONVOLUTION_LENGTH = 8
 
 pos_to_int = {
@@ -34,3 +36,9 @@ D = CONVOLUTION_LENGTH * NUM_POS_TAGS
 
 # most sentences have at most 64 words, so we can truncate/pad to this length
 MAX_SENTENCE_LENGTH = 64
+
+NUM_EPOCH = 32
+
+LEARNING_RATE = 1e-5
+
+SAVE_DIR = 'checkpoint/'
