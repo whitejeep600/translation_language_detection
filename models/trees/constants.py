@@ -24,4 +24,13 @@ pos_to_int = {
     'SCONJ': 13,
     'SYM': 14,
     'VERB': 15,
+    'X': -1
 }
+
+NUM_POS_TAGS = len(pos_to_int) - 1  # not counting the 'X' ('other', 'unrecognized') tag
+
+# word representation dimension
+D = CONVOLUTION_LENGTH * NUM_POS_TAGS
+
+# most sentences have at most 64 words, so we can truncate/pad to this length
+MAX_SENTENCE_LENGTH = 64

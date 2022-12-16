@@ -1,33 +1,60 @@
-import random
-
 import stanza
+import torch
 
-from translation_language_detection.models.trees.train import read_training_data
+from translation_language_detection.models.trees.constants import CONVOLUTION_LENGTH, pos_to_int, NUM_POS_TAGS, D, \
+    MAX_SENTENCE_LENGTH
 
-
-def length_to_root(tree, index):
-    if tree.sentences[0].tokens[index].words[0].head == 0:
-        return 0
-    else:
-        return length_to_root(tree, tree.sentences[0].tokens[index].words[0].head - 1) + 1
+pipeline = stanza.Pipeline('en', processors='tokenize,mwt,pos,lemma,depparse')
 
 
-def tree_height(tree):
-    return max([length_to_root(tree, index) for index in range(len(tree.sentences[0].tokens))])
+def process_tree(tree):
+    return [{'pos': word.words[0].upos, 'parent': word.words[0].head - 1} for word in tree.sentences[0].tokens]
 
 
-def parse_sentence(sentence, pipeline):
+def parse_sentence(sentence):
     tree = pipeline(sentence)
-    return tree
+    return process_tree(tree)
 
 
-if __name__ == '__main__':
-    pipeline = stanza.Pipeline('en', processors='tokenize,mwt,pos,lemma,depparse')
-    # all_sentences = read_training_data()
-    # random.shuffle(all_sentences)
-    # sample = [sentence['text'] for sentence in all_sentences[:128]]
-    # lengths = [tree_height(tree) for tree in [parse_sentence(sentence, pipeline) for sentence in sample]]
-    # print(sorted(lengths))
-    # print(sum(lengths)/len(lengths))
-    # about 10% of height greater than 8
-    print(parse_sentence("your father jumps over your very lazy mother", pipeline))
+# word representation is obtained by concatenating CONVOLUTION_LENGTH vectors,
+# of which the i-th corresponds to the i-th ancestor of the word in the dependency
+# tree. Each i-th vector is either a vector of zeroes (if i > distance from the word
+# to the root, or the i-th ancestor's POS tag was not recognized) or a one-hot
+# vector representing the i-th ancestor's POS tag (as per the POS->int mapping in
+# pos_to_int).
+# this function takes a parse tree and a word index in the original sentence,
+# and returns a list whose i-th element is either -1 (if the i-th vector to be
+# concatenated should be all zeroes) or n if the n-th feature of the i-th vector
+# should be 'hot'.
+def pos_indices_for_word(dependency_information, word_index):
+    indices = []
+    for i in range(CONVOLUTION_LENGTH):
+        if word_index == -1:
+            indices.append(-1)
+        else:
+            indices.append(pos_to_int[dependency_information[word_index]['pos']])
+            word_index = dependency_information[word_index]['parent']
+    return indices
+
+
+# converts the list returned by the previous function to the list of indices that should
+# be 'hot' in the vector resulting from the concatenation.
+def pos_indexes_to_hot_features(pos_indices):
+    hot_features = []
+    for i in range(len(pos_indices)):
+        if pos_indices[i] != -1:
+            hot_features.append(i * NUM_POS_TAGS + pos_indices[i])
+    return hot_features
+
+
+# the first dimension corresponds to the representation features of the given word,
+# the second - to the word's position in the sentence.
+# think about this as vector representations of each word, glued together horizontally.
+def sentence_to_matrix(sentence):
+    parsed = parse_sentence(sentence)
+    hot_feature_list = [pos_indexes_to_hot_features(pos_indices_for_word(parsed, i)) for i in range(len(parsed))]
+    matrix = torch.zeros(D, MAX_SENTENCE_LENGTH, dtype=torch.float)
+    for i in range(min([len(hot_feature_list), MAX_SENTENCE_LENGTH])):
+        for feature in hot_feature_list[i]:
+            matrix[feature, i] = torch.FloatTensor([1.0])
+    return matrix
