@@ -57,5 +57,5 @@ def sentence_to_matrix(sentence):
     matrix = torch.zeros(D, MAX_SENTENCE_LENGTH, dtype=torch.float)
     for i in range(min([len(hot_feature_list), MAX_SENTENCE_LENGTH])):
         for feature in hot_feature_list[i]:
-            matrix[feature, i] = torch.FloatTensor([1.0])
+            matrix[feature, i] = torch.LongTensor([1.0])
     return matrix

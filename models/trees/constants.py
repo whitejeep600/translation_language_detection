@@ -41,4 +41,4 @@ NUM_EPOCH = 32
 
 LEARNING_RATE = 1e-5
 
-SAVE_DIR = 'checkpoint/'
+SAVE_DIR = 'checkpoint/6'

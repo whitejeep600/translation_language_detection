@@ -1,11 +1,23 @@
+import torch
 import torch.nn as nn
+
+
+class InitialDimReduction(nn.Module):
+    def __init__(self, sequence_length):
+        super().__init__()
+        self.vector = torch.nn.Parameter(torch.rand(sequence_length))
+        self.vector.requires_grad = True
+
+    def forward(self, x):
+        res = torch.matmul(x, self.vector)
+        return res
 
 
 class TranslationDetector(nn.Module):
     def __init__(self, representation_dim, sequence_length, num_classes):
         super(TranslationDetector, self).__init__()
         self.network = nn.Sequential(
-            nn.Linear(sequence_length, 1),  # converting sentence matrix representation to vector representation
+            InitialDimReduction(sequence_length),  # converting sentence matrix representation to vector representation
             nn.Linear(representation_dim, representation_dim),  # first layer, preserving dimension
             nn.Sigmoid(),
             nn.Linear(representation_dim, representation_dim),  # second layer, preserving dimension

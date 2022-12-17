@@ -69,7 +69,7 @@ class Trainer:
 def create_dataloader(split):
     dataset = TranslationDetectionDataset(split, label_to_int)
     return DataLoader(dataset, batch_size=32, shuffle=True,
-                      collate_fn=TranslationDetectionDataset.collate_fn)
+                      collate_fn=dataset.collate_fn)
 
 
 if __name__ == '__main__':
@@ -85,3 +85,4 @@ if __name__ == '__main__':
     optimizer = SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9)
     loss_function = torch.nn.CrossEntropyLoss()
     trainer = Trainer(model, loss_function, optimizer, train_loader, validation_loader, NUM_EPOCH, SAVE_DIR)
+    trainer.train()
