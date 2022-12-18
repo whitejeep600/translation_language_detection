@@ -38,7 +38,7 @@ class Tester:
                 result[paragraph['language']][paragraph['translator']]['incorrect'] += 1
         with open("test_results.json", "w") as file:
             file.write(result_json)
-        print(f'correct {correct} out of {total}.')
+        print(f'Correct: {correct} out of {total}.')
 
 
 def load_model():

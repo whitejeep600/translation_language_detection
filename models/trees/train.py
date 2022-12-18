@@ -63,6 +63,7 @@ class Trainer:
         print(f'Average validation loss this epoch (per batch): {average_loss}\n')
         print(f'correct: {correct} out of {all_samples_no}. Epoch ended\n')
         if correct > self.best_accuracy:
+            print('Saving model to ' + self.save_dir)
             torch.save(self.model.state_dict(), self.save_dir + "")
             self.best_accuracy = correct
 
