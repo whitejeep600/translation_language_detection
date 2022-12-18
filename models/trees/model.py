@@ -6,7 +6,7 @@ class InitialDimReduction(nn.Module):
     def __init__(self, sequence_length):
         super().__init__()
         self.vector = torch.nn.Parameter(torch.rand(sequence_length)).to("cuda:0")
-        assert(self.vector.requires_grad)
+        assert self.vector.requires_grad
 
     def forward(self, x):
         res = torch.matmul(x, self.vector)
@@ -26,7 +26,4 @@ class TranslationDetector(nn.Module):
         )
 
     def forward(self, batch):
-        target_device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        batch = batch.to(target_device)
-        print(batch.device)
         return self.network(batch)

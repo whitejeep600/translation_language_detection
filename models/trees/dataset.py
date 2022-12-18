@@ -23,7 +23,7 @@ class TranslationDetectionDataset(Dataset):
         return len(self.label_mapping)
 
     def collate_fn(self, samples):
-        text_tensor =  torch.stack([sentence_to_matrix(sentence['text']) for sentence in samples])
+        text_tensor = torch.stack([sentence_to_matrix(sentence['text']) for sentence in samples])
         label_tensor = torch.LongTensor([self.label_mapping[sentence['language']] for sentence in samples])
         return {'text': text_tensor.to(self.target_device),
                 'label': label_tensor.to(self.target_device)}

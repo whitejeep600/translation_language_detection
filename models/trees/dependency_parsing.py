@@ -1,7 +1,7 @@
 import stanza
 import torch
 
-from constants import CONVOLUTION_LENGTH, pos_to_int, NUM_POS_TAGS, D, \
+from constants import CONVOLUTION_LENGTH, POS_TO_INT, NUM_POS_TAGS, D, \
     MAX_SENTENCE_LENGTH
 
 
@@ -22,7 +22,7 @@ def parse_sentence(sentence):
 # tree. Each i-th vector is either a vector of zeroes (if i > distance from the word
 # to the root, or the i-th ancestor's POS tag was not recognized) or a one-hot
 # vector representing the i-th ancestor's POS tag (as per the POS->int mapping in
-# pos_to_int).
+# POS_TO_INT).
 # this function takes a parse tree and a word index in the original sentence,
 # and returns a list whose i-th element is either -1 (if the i-th vector to be
 # concatenated should be all zeroes) or n if the n-th feature of the i-th vector
@@ -33,7 +33,7 @@ def pos_indices_for_word(dependency_information, word_index):
         if word_index == -1:
             indices.append(-1)
         else:
-            indices.append(pos_to_int[dependency_information[word_index]['pos']])
+            indices.append(POS_TO_INT[dependency_information[word_index]['pos']])
             word_index = dependency_information[word_index]['parent']
     return indices
 

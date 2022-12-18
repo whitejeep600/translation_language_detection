@@ -3,6 +3,8 @@ from pathlib import Path
 
 from nltk import tokenize
 
+from constants import LANGUAGES
+
 
 def read_language(language):
     path = '../../data/translated/from_' + language + '/train_' + language + '.json'
@@ -15,9 +17,16 @@ def read_language(language):
     return sentences
 
 
-def read_training_data():
-    languages = ['indonesian', 'arabic']
-    data_by_language = [read_language(language) for language in languages]
+def read_test_language(language):
+    path = '../../data/translated/from_' + language + '/test_' + language + '.json'
+    return json.loads(Path(path).read_text(encoding='utf-8'))
+
+
+def read_data(testing=False):
+    if not testing:
+        data_by_language = [read_language(language) for language in LANGUAGES]
+    else:
+        data_by_language = [read_test_language(language) for language in LANGUAGES]
     all_data = []
     for data in data_by_language:
         all_data += data

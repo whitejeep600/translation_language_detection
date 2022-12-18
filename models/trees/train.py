@@ -3,13 +3,13 @@ import random
 import torch
 from torch.optim import SGD
 from torch.utils.data import DataLoader
-from tqdm import trange, tqdm
+from tqdm import tqdm
 
 from constants import label_to_int, NUM_EPOCH, NUM_LABELS, \
     MAX_SENTENCE_LENGTH, D, LEARNING_RATE, SAVE_DIR
 from dataset import TranslationDetectionDataset
 from model import TranslationDetector
-from readers import read_training_data
+from readers import read_data
 
 
 class Trainer:
@@ -63,7 +63,7 @@ class Trainer:
         print(f'Average validation loss this epoch (per batch): {average_loss}\n')
         print(f'correct: {correct} out of {all_samples_no}. Epoch ended\n')
         if correct > self.best_accuracy:
-            torch.save(self.model.state_dict(), self.save_dir)
+            torch.save(self.model.state_dict(), self.save_dir + "")
             self.best_accuracy = correct
 
 
@@ -74,7 +74,7 @@ def create_dataloader(split):
 
 
 if __name__ == '__main__':
-    all_sentences = read_training_data()
+    all_sentences = read_data()
     random.shuffle(all_sentences)
     validation_split = all_sentences[:len(all_sentences) // 10]
     train_split = all_sentences[len(all_sentences) // 10:]

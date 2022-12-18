@@ -1,3 +1,5 @@
+LANGUAGES = ['arabic', 'indonesian']
+
 label_to_int = {
     'arabic': 0,
     'chinese': 1,
@@ -5,11 +7,13 @@ label_to_int = {
     'japanese': 3
 }
 
+TEST_TRANSLATORS = ['helsinki', 'mbart']
+
 NUM_LABELS = len(label_to_int)
 
 CONVOLUTION_LENGTH = 8
 
-pos_to_int = {
+POS_TO_INT = {
     'ADJ': 0,
     'ADP': 1,
     'ADV': 2,
@@ -29,7 +33,7 @@ pos_to_int = {
     'X': -1
 }
 
-NUM_POS_TAGS = len(pos_to_int) - 1  # not counting the 'X' ('other', 'unrecognized') tag
+NUM_POS_TAGS = len(POS_TO_INT) - 1  # not counting the 'X' ('other', 'unrecognized') tag
 
 # word representation dimension
 D = CONVOLUTION_LENGTH * NUM_POS_TAGS
@@ -37,8 +41,8 @@ D = CONVOLUTION_LENGTH * NUM_POS_TAGS
 # most sentences have at most 64 words, so we can truncate/pad to this length
 MAX_SENTENCE_LENGTH = 64
 
-NUM_EPOCH = 32
+NUM_EPOCH = 1
 
 LEARNING_RATE = 1e-5
 
-SAVE_DIR = 'checkpoint/6'
+SAVE_DIR = 'checkpoint/model.pt'
