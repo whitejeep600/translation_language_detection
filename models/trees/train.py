@@ -21,7 +21,7 @@ class Trainer:
         self.validation_loader = validation_loader
         self.num_epoch = num_epoch
         self.save_dir = save_dir
-        self.best_accuracy = 0
+        self.best_accuracy = -1
         pass
 
     def get_number_of_correct(self, predictions, languages):
@@ -64,7 +64,7 @@ class Trainer:
         print(f'correct: {correct} out of {all_samples_no}. Epoch ended\n')
         if correct > self.best_accuracy:
             print('Saving model to ' + self.save_dir)
-            torch.save(self.model.state_dict(), self.save_dir + "")
+            torch.save(self.model.state_dict(), self.save_dir)
             self.best_accuracy = correct
 
 
@@ -75,7 +75,7 @@ def create_dataloader(split):
 
 
 if __name__ == '__main__':
-    all_sentences = read_data()
+    all_sentences = read_data()[:10]
     random.shuffle(all_sentences)
     validation_split = all_sentences[:len(all_sentences) // 10]
     train_split = all_sentences[len(all_sentences) // 10:]

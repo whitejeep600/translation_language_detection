@@ -15,7 +15,7 @@ class Tester:
         self.paragraphs = paragraphs
 
     def correct(self, paragraph):
-        text_tensor = torch.stack([sentence_to_matrix(sentence['text'])
+        text_tensor = torch.stack([sentence_to_matrix(sentence)
                                    for sentence in tokenize.sent_tokenize(paragraph['paragraph'])])
         predictions_tensor = self.model(text_tensor)
         return torch.mode(predictions_tensor) == paragraph['language']
@@ -43,13 +43,13 @@ class Tester:
 
 def load_model():
     target_device = "cuda:0" if torch.cuda.is_available() else "cpu"  # always using GPU if available
-    model_no_device = TranslationDetector(D, MAX_SENTENCE_LENGTH, NUM_LABELS)
-    model = model_no_device.to(target_device)
+    model = TranslationDetector(D, MAX_SENTENCE_LENGTH, NUM_LABELS)
+    model.load_state_dict(torch.load(SAVE_DIR))
     model.eval()
-    model.load_state_dict(SAVE_DIR)
+    model.to(target_device)
     return model
 
 
 if __name__ == '__main__':
-    tester = Tester(load_model(), read_data(testing=True))
+    tester = Tester(load_model(), read_data(testing=True)[10])
     tester.test()
