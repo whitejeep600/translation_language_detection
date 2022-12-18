@@ -36,7 +36,8 @@ class Trainer:
     def train_iteration(self):
         self.model.train()
         progress = tqdm(total=len(self.train_loader.dataset), desc="Processed batch")
-        for batch in iter(self.train_loader):
+        batch = next(iter(self.train_loader))
+        for _ in iter(self.train_loader):
             sentences = batch['text']
             labels = batch['label']
             predictions = self.model(sentences)
@@ -45,6 +46,7 @@ class Trainer:
             current_loss.backward()
             self.optimizer.step()
             progress.update(1)
+            print(f'loss: {current_loss.item()}')
 
     def eval_iteration(self):
         all_samples_no = len(self.validation_loader.dataset)
