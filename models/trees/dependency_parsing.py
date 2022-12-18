@@ -1,11 +1,11 @@
 import stanza
 import torch
 
-from translation_language_detection.models.trees.constants import CONVOLUTION_LENGTH, pos_to_int, NUM_POS_TAGS, D, \
+from constants import CONVOLUTION_LENGTH, pos_to_int, NUM_POS_TAGS, D, \
     MAX_SENTENCE_LENGTH
 
 
-pipeline = stanza.Pipeline('en', processors='tokenize,mwt,pos,lemma,depparse')
+pipeline = stanza.Pipeline('en', processors='tokenize,mwt,pos,lemma,depparse', use_gpu=True)
 
 
 def process_tree(tree):

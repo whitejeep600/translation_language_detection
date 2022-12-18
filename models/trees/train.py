@@ -5,11 +5,11 @@ from torch.optim import SGD
 from torch.utils.data import DataLoader
 from tqdm import trange, tqdm
 
-from translation_language_detection.models.trees.constants import label_to_int, NUM_EPOCH, NUM_LABELS, \
+from constants import label_to_int, NUM_EPOCH, NUM_LABELS, \
     MAX_SENTENCE_LENGTH, D, LEARNING_RATE, SAVE_DIR
-from translation_language_detection.models.trees.dataset import TranslationDetectionDataset
-from translation_language_detection.models.trees.model import TranslationDetector
-from translation_language_detection.models.trees.readers import read_training_data
+from dataset import TranslationDetectionDataset
+from model import TranslationDetector
+from readers import read_training_data
 
 
 class Trainer:
@@ -36,8 +36,7 @@ class Trainer:
     def train_iteration(self):
         self.model.train()
         progress = tqdm(total=len(self.train_loader.dataset), desc="Processed batch")
-        batch = next(iter(self.train_loader))
-        for _ in iter(self.train_loader):
+        for batch in iter(self.train_loader):
             sentences = batch['text']
             labels = batch['label']
             predictions = self.model(sentences)
@@ -81,7 +80,7 @@ if __name__ == '__main__':
     train_split = all_sentences[len(all_sentences) // 10:]
     validation_loader = create_dataloader(validation_split)
     train_loader = create_dataloader(train_split)
-    target_device = "cuda" if torch.cuda.is_available() else "cpu"  # always using GPU if available
+    target_device = "cuda:0" if torch.cuda.is_available() else "cpu"  # always using GPU if available
     model_no_device = TranslationDetector(D, MAX_SENTENCE_LENGTH, NUM_LABELS)
     model = model_no_device.to(target_device)
     optimizer = SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9)
