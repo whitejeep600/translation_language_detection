@@ -1,15 +1,16 @@
 LANGUAGES = ['arabic', 'indonesian']
 
-label_to_int = {
+LABEL_TO_INT = {
     'arabic': 0,
     'chinese': 1,
     'indonesian': 2,
     'japanese': 3
 }
 
-TEST_TRANSLATORS = ['helsinki', 'mbart']
+TEST_TRANSLATORS = {'indonesian': ['helsinki', 'mbart'],
+                    'arabic': ['Helsinki-NLP/opus-mt-ar-en', 'facebook/mbart-large-50-many-to-one-mmt']}
 
-NUM_LABELS = len(label_to_int)
+NUM_LABELS = len(LABEL_TO_INT)
 
 CONVOLUTION_LENGTH = 8
 

@@ -4,13 +4,14 @@ import torch
 from torch.utils.data import Dataset
 
 from dependency_parsing import sentence_to_matrix
+from utils import get_target_device
 
 
 class TranslationDetectionDataset(Dataset):
     def __init__(self, data: List[Dict], label_mapping: Dict[str, int],):
         self.data = data
         self.label_mapping = label_mapping
-        self.target_device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        self.target_device = get_target_device()
 
     def __len__(self) -> int:
         return len(self.data)

@@ -5,11 +5,12 @@ from torch.optim import SGD
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from constants import label_to_int, NUM_EPOCH, NUM_LABELS, \
+from constants import LABEL_TO_INT, NUM_EPOCH, NUM_LABELS, \
     MAX_SENTENCE_LENGTH, D, LEARNING_RATE, SAVE_DIR
 from dataset import TranslationDetectionDataset
 from model import TranslationDetector
 from readers import read_data
+from utils import get_target_device
 
 
 class Trainer:
@@ -69,7 +70,7 @@ class Trainer:
 
 
 def create_dataloader(split):
-    dataset = TranslationDetectionDataset(split, label_to_int)
+    dataset = TranslationDetectionDataset(split, LABEL_TO_INT)
     return DataLoader(dataset, batch_size=32, shuffle=True,
                       collate_fn=dataset.collate_fn)
 
@@ -81,7 +82,7 @@ if __name__ == '__main__':
     train_split = all_sentences[len(all_sentences) // 10:]
     validation_loader = create_dataloader(validation_split)
     train_loader = create_dataloader(train_split)
-    target_device = "cuda:0" if torch.cuda.is_available() else "cpu"  # always using GPU if available
+    target_device = get_target_device()  # always using GPU if available
     model_no_device = TranslationDetector(D, MAX_SENTENCE_LENGTH, NUM_LABELS)
     model = model_no_device.to(target_device)
     optimizer = SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9)

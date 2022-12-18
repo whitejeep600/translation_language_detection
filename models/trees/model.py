@@ -1,11 +1,13 @@
 import torch
 import torch.nn as nn
 
+from utils import get_target_device
+
 
 class InitialDimReduction(nn.Module):
     def __init__(self, sequence_length):
         super().__init__()
-        self.vector = torch.nn.Parameter(torch.rand(sequence_length)).to("cuda:0")
+        self.vector = torch.nn.Parameter(torch.rand(sequence_length)).to(get_target_device())
         assert self.vector.requires_grad
 
     def forward(self, x):
