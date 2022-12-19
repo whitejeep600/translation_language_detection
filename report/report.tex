@@ -73,6 +73,8 @@ Gather lots of text documents in a few languages, use machine translation models
 
 some previous papers have shown it’s possible to detect the original language of a human-generated translation
 
+relevant to the lecture becaaause 1. we use deep learning 2. we evaluate sota deep learning
+
 \section*{Related work}
 
 https://aclanthology.org/2021.naacl-main.462.pdf 
@@ -105,47 +107,66 @@ Maybe easier to recognize longer text (for reliable document-level statistics), 
 
 \section*{Approach}
 
-relevant to the lecture becaaause 1. we use deep learning 2. we evaluate sota deep learning
+\subsection*{Chosen languages}
 
 chosen languages
 grammar not similar to english
 configurational languages?
 
-dataset creation method, applied models
+\subsection*{Dataset creation}
 
 a comparison between multilingually trained models and not
 
 some paragraphs shorter because removed sentences of length > 256 after tokenization
 random link sampling + at most two paragraphs from each site to avoid too many related to the same subject
-decided not to remove proper names even though one paper did. Just limited the number of paragraphs from the same site; there was really lots of diversity, and besides there was an overlap in subjects between languages (e.g. those pesky christians in both arabic and indonesian datasets) so we decided it's safer to just leave them, especially since otherwise we'd have had to replace them with something so that all the grammar of the sentence doesn't go bonkers (especially after translation)
+decided not to remove proper names even though one paper did. Just limited the number of paragraphs from the same site; there was really lots of diversity, and besides there was an overlap in subjects between languages (e.g. those pesky christians in both arabic and indonesian datasets) so we decided it's safer to just leave them, especially since otherwise we'd have had to replace them with something so that all the grammar of the sentence doesn't go bonkers (especially after translation), and besides for POS-based models, that doesn't make a difference either way
 
 paragraphs are not actually that - all sentences in a given article are concatenated together, and then we create two chunks by choosing two sequences of whole consecutive sentences, so that the length of a chunk (in words) only slightly exceeds 256 (i.e. would be below 256 if we didn't include the last sentence).
 
-indonesian dataset:
-252 from deepl
+Final dataset composition for each language (everone should describe their own, if possible):
+
+\begin{itemize}
+	\item Arabic:
+	\item Chinese:
+	\item Indonesian:
+	252 from deepl
 995 from  microsoft
 330 from  libretranslate
 ^ numbers before removing duplicates, in the whole Indonesian set, there were about 2% of paragraphs to remove due to duplications
+	\item Japanese:
+\end{itemize}
 
-dataset: mention the proper names discussion
+\subsection*{Models}
 
-for trees:
+Four models have been created: blah blah lenin was a mushroom
+
+more precise descriptions (everyone should describe their own):
+
+\subsection*{Bert}
+
+\subsection*{RoBERTA on POS tags}
+
+\subsection*{SVM}
+
+\subsection*{Dependency tree CNN}
+
 https://aclanthology.org/P15-2029.pdf
 ^ dependency tree CNN (?) concatenating ancestral vectors (final method)
 
 https://nlp.stanford.edu/pubs/zhang2018graph.pdf
 ^ alternative method
 
-
 https://arxiv.org/pdf/1609.03286.pdf
 ^ also processing parse trees
 
 and explain who chose one-hot POS embedding and not to include siblings oh and why dependency parsing rather than abstract meaning representation (why? syntax)
+explain how sentence length, number of ancestors was chosen
 
 
 \section*{Results}
 
 introduce the test results, draw some conclusions
+for every language-translator pair, number of correctly/incorrectly classified paragraphs, if possible. also ofc everyone should report their own
 
 \section*{Conclusion}
 
