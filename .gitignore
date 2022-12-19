@@ -1,3 +1,4 @@
 report/*
 !report/report.pdf
 !report/report.tex
+models/trees/__pycache__/

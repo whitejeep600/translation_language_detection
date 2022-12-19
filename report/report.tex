@@ -4,7 +4,6 @@
 \usepackage[mathcal]{euscript}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[polish]{babel}
 \usepackage{graphicx}
 \graphicspath{ {./} }
 
@@ -62,9 +61,133 @@
 
 \begin{document}
 
-\section*{lorem}
+\section*{Abstract}
 
-ipsum
+\section*{Source language detection}
+
+mention that it isn't a common task; related work here too
+
+motivation: test sota models, if detection possible, we're curious which features will be  s a l i e n t  (xd) for detection
+
+Gather lots of text documents in a few languages, use machine translation models to translate them to english, feed them to some kind of model, telling it what language each document was translated from. See if it can learn to recognize that. If the translation models are good enough, that should be impossible.
+
+some previous papers have shown it’s possible to detect the original language of a human-generated translation
+
+\section*{Related work}
+
+https://aclanthology.org/2021.naacl-main.462.pdf 
+ It detects the translated text using round-trip method. 
+
+
+https://arxiv.org/pdf/1910.06558.pdf
+. It uses back translation method. 
+
+
+https://aclanthology.org/W18-1603.pdf
+^ translated text detection on Chinese. 
+
+
+https://www.cs.cmu.edu/~dkurokaw/publications/MTS-2009-Kurokawa.pdf
+
+^This paper detects text translated from french, they say some n-grams were very frequent, and also more articles and prepositions than in originally english text
+
+"good classification accuracy was obtained even when texts were reduced to part-of-speech sequences"  maybe use some model based on POS sequences, then?
+
+
+https://aclanthology.org/C12-2076.pdf
+
+^his paper is interesting because the task is similar to ours. Among others they create vector representations for articles based on some document-level metrics, and SVM based on that. Certain 2-grams were very frequent for translations from certain languages
+
+Maybe easier to recognize longer text (for reliable document-level statistics), which is why we use whole paragraphs rather than sentences
+
+
+
+
+\section*{Approach}
+
+relevant to the lecture becaaause 1. we use deep learning 2. we evaluate sota deep learning
+
+chosen languages
+grammar not similar to english
+configurational languages?
+
+dataset creation method, applied models
+
+a comparison between multilingually trained models and not
+
+some paragraphs shorter because removed sentences of length > 256 after tokenization
+random link sampling + at most two paragraphs from each site to avoid too many related to the same subject
+decided not to remove proper names even though one paper did. Just limited the number of paragraphs from the same site; there was really lots of diversity, and besides there was an overlap in subjects between languages (e.g. those pesky christians in both arabic and indonesian datasets) so we decided it's safer to just leave them, especially since otherwise we'd have had to replace them with something so that all the grammar of the sentence doesn't go bonkers (especially after translation)
+
+paragraphs are not actually that - all sentences in a given article are concatenated together, and then we create two chunks by choosing two sequences of whole consecutive sentences, so that the length of a chunk (in words) only slightly exceeds 256 (i.e. would be below 256 if we didn't include the last sentence).
+
+indonesian dataset:
+252 from deepl
+995 from  microsoft
+330 from  libretranslate
+^ numbers before removing duplicates, in the whole Indonesian set, there were about 2% of paragraphs to remove due to duplications
+
+dataset: mention the proper names discussion
+
+for trees:
+https://aclanthology.org/P15-2029.pdf
+^ dependency tree CNN (?) concatenating ancestral vectors (final method)
+
+https://nlp.stanford.edu/pubs/zhang2018graph.pdf
+^ alternative method
+
+
+https://arxiv.org/pdf/1609.03286.pdf
+^ also processing parse trees
+
+and explain who chose one-hot POS embedding and not to include siblings oh and why dependency parsing rather than abstract meaning representation (why? syntax)
+
+
+\section*{Results}
+
+introduce the test results, draw some conclusions
+
+\section*{Conclusion}
+
+sum up, propose further work, acknowledge shortcomings
+
+If it turns out our model is trash, it might be either because 1. It really is trash 2. current state-of-the-art translation models are just so good
+
+maybe we should try it on some old translation model, worse than current SOTA
+
+for validation we maybe should have different translators, so that we're sure our model learned what text translated from Korean looks like, and didn't just learn what text translated by Google Translate looks like.
+we ended up not doing that. But we did include other models for the train set to make it noisier. So maybe it’s not that bad. 
+
+
+\section*{Work distribution}
+
+I really hope I didn't make any mistakes in your names XD
+
+\begin{itemize}
+	\item Chih-Hsiang Hsu
+	\begin{itemize}
+		\item todo
+		\item todo
+	\end{itemize}
+	
+	\item Chung-Hao Liao
+	\begin{itemize}
+		\item todo
+	\end{itemize}
+	
+	\item Antoni Maciąg
+	\begin{itemize}
+		\item todo
+	\end{itemize}
+	
+	\item Jen-Tse Wei
+	\begin{itemize}
+		\item todo
+	\end{itemize}
+\end{itemize}
+
+
+
 
 \end{document}
 
