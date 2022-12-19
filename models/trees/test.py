@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from constants import SAVE_DIR, MAX_SENTENCE_LENGTH, NUM_LABELS, D, LANGUAGES, TEST_TRANSLATORS, LABEL_TO_INT
 from model import TranslationDetector
-from dependency_parsing import sentence_to_matrix
+from dependency_parsing import sentences_to_matrix
 from readers import read_data
 from utils import get_target_device
 
@@ -17,7 +17,7 @@ class Tester:
         self.paragraphs = paragraphs
 
     def correct(self, paragraph):
-        text_tensor = torch.stack([sentence_to_matrix(sentence)
+        text_tensor = torch.stack([sentences_to_matrix([sentence])
                                    for sentence in tokenize.sent_tokenize(paragraph['paragraph'])])
         predictions_tensor = self.model(text_tensor)
         return torch.mode(torch.argmax(predictions_tensor, dim=1))[0].item() == LABEL_TO_INT[paragraph['language']]
@@ -48,7 +48,7 @@ class Tester:
 
 def load_model():
     model = TranslationDetector(D, MAX_SENTENCE_LENGTH, NUM_LABELS)
-    model.load_state_dict(torch.load(SAVE_DIR))
+    model.load_state_dict(torch.load(SAVE_DIR + '/model.pt'))
     model.eval()
     model.to(get_target_device())
     return model

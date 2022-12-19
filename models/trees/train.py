@@ -1,3 +1,4 @@
+import json
 import random
 
 import torch
@@ -10,7 +11,7 @@ from constants import LABEL_TO_INT, NUM_EPOCH, NUM_LABELS, \
 from dataset import TranslationDetectionDataset
 from model import TranslationDetector
 from readers import read_data
-from utils import get_target_device
+from utils import get_target_device, get_number_of_correct
 
 
 class Trainer:
@@ -21,12 +22,10 @@ class Trainer:
         self.train_loader = train_loader
         self.validation_loader = validation_loader
         self.num_epoch = num_epoch
-        self.save_dir = save_dir
+        self.save_path = save_dir + '/model.pt'
         self.best_accuracy = -1
+        self.batch_losses = []
         pass
-
-    def get_number_of_correct(self, predictions, languages):
-        return len([i for i in range(len(predictions)) if torch.argmax(predictions[i]) == languages[i]])
 
     def train(self):
         for i in range(self.num_epoch):
@@ -46,8 +45,8 @@ class Trainer:
             current_loss.backward()
             self.optimizer.step()
             progress.update(1)
-            if i % 64 == 0:
-                print(f'\nloss: {current_loss.item()}')
+            if i % 512 == 0:
+                self.batch_losses.append(current_loss.item())
 
     def eval_iteration(self):
         all_samples_no = len(self.validation_loader.dataset)
@@ -59,15 +58,20 @@ class Trainer:
                 sentences = batch['text']
                 labels = batch['label']
                 predictions = self.model(sentences)
-                correct += self.get_number_of_correct(predictions, labels)
+                correct += get_number_of_correct(predictions, labels)
                 batch_losses.append(self.loss_function(predictions, labels))
         average_loss = sum(batch_losses) / len(batch_losses)
         print(f'Average validation loss this epoch (per batch): {average_loss}\n')
         print(f'correct: {correct} out of {all_samples_no}. Epoch ended\n')
         if correct > self.best_accuracy:
-            print('Saving model to ' + self.save_dir)
-            torch.save(self.model.state_dict(), self.save_dir)
+            print('Saving model to ' + self.save_path)
+            torch.save(self.model.state_dict(), self.save_path)
             self.best_accuracy = correct
+
+    def dump_losses(self):
+        losses_json = json.dumps(self.batch_losses, indent=4)
+        with open(SAVE_DIR + '/batch_losses', 'w') as file:
+            file.write(losses_json)
 
 
 def create_dataloader(split):
