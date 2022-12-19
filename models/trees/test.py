@@ -1,5 +1,4 @@
 import json
-from random import shuffle
 
 import torch
 from nltk import tokenize
@@ -56,8 +55,5 @@ def load_model():
 
 
 if __name__ == '__main__':
-    data = read_data(testing=True)
-    shuffle(data)
-    data = data[:10]
-    tester = Tester(load_model(), data)
+    tester = Tester(load_model(), read_data(testing=True))
     tester.test()

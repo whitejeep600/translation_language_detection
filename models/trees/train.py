@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from constants import LABEL_TO_INT, NUM_EPOCH, NUM_LABELS, \
-    MAX_SENTENCE_LENGTH, D, LEARNING_RATE, SAVE_DIR
+    MAX_SENTENCE_LENGTH, D, LEARNING_RATE, SAVE_DIR, BATCH_SIZE
 from dataset import TranslationDetectionDataset
 from model import TranslationDetector
 from readers import read_data
@@ -36,8 +36,8 @@ class Trainer:
 
     def train_iteration(self):
         self.model.train()
-        progress = tqdm(total=len(self.train_loader.dataset), desc="Processed batch")
-        for batch in iter(self.train_loader):
+        progress = tqdm(total=len(self.train_loader.dataset) // BATCH_SIZE, desc="Processed batch")
+        for i, batch in enumerate(self.train_loader):
             sentences = batch['text']
             labels = batch['label']
             predictions = self.model(sentences)
@@ -46,7 +46,8 @@ class Trainer:
             current_loss.backward()
             self.optimizer.step()
             progress.update(1)
-            print(f'loss: {current_loss.item()}')
+            if i % 64 == 0:
+                print(f'\nloss: {current_loss.item()}')
 
     def eval_iteration(self):
         all_samples_no = len(self.validation_loader.dataset)
@@ -71,12 +72,12 @@ class Trainer:
 
 def create_dataloader(split):
     dataset = TranslationDetectionDataset(split, LABEL_TO_INT)
-    return DataLoader(dataset, batch_size=32, shuffle=True,
+    return DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True,
                       collate_fn=dataset.collate_fn)
 
 
 if __name__ == '__main__':
-    all_sentences = read_data()[:10]
+    all_sentences = read_data()
     random.shuffle(all_sentences)
     validation_split = all_sentences[:len(all_sentences) // 10]
     train_split = all_sentences[len(all_sentences) // 10:]

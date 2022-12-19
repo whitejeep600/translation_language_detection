@@ -5,16 +5,16 @@ from constants import CONVOLUTION_LENGTH, POS_TO_INT, NUM_POS_TAGS, D, \
     MAX_SENTENCE_LENGTH
 
 
-pipeline = stanza.Pipeline('en', processors='tokenize,mwt,pos,lemma,depparse', use_gpu=True)
+pipeline = stanza.Pipeline('en', processors='tokenize,mwt,pos,lemma,depparse', use_gpu=True, tokenize_pretokenized=True)
 
 
 def process_tree(tree):
-    return [{'pos': word.words[0].upos, 'parent': word.words[0].head - 1} for word in tree.sentences[0].tokens]
+    return [{'pos': word.words[0].upos, 'parent': word.words[0].head - 1} for word in tree.tokens]
 
 
-def parse_sentence(sentence):
-    tree = pipeline(sentence)
-    return process_tree(tree)
+def parse_sentences(sentences):
+    trees = pipeline(sentences).sentences
+    return [process_tree(tree) for tree in trees]
 
 
 # word representation is obtained by concatenating CONVOLUTION_LENGTH vectors,
@@ -51,11 +51,15 @@ def pos_indexes_to_hot_features(pos_indices):
 # the first dimension corresponds to the representation features of the given word,
 # the second - to the word's position in the sentence.
 # i.e. the matrix contains vector representations of each word, glued together horizontally.
-def sentence_to_matrix(sentence):
-    parsed = parse_sentence(sentence)
+def sentence_to_matrix(parsed):
     hot_feature_list = [pos_indexes_to_hot_features(pos_indices_for_word(parsed, i)) for i in range(len(parsed))]
     matrix = torch.zeros(D, MAX_SENTENCE_LENGTH, dtype=torch.float)
     for i in range(min([len(hot_feature_list), MAX_SENTENCE_LENGTH])):
         for feature in hot_feature_list[i]:
             matrix[feature, i] = torch.LongTensor([1.0])
     return matrix
+
+
+def sentences_to_matrix(sentences):
+    parsed_sentences = parse_sentences('\n'.join(sentences))
+    return [sentence_to_matrix(parsed_sentence) for parsed_sentence in parsed_sentences]

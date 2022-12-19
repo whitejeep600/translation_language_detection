@@ -44,6 +44,8 @@ MAX_SENTENCE_LENGTH = 64
 
 NUM_EPOCH = 1
 
+BATCH_SIZE = 32
+
 LEARNING_RATE = 1e-4
 
 SAVE_DIR = 'checkpoint/model.pt'
