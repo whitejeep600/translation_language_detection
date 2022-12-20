@@ -4,6 +4,7 @@
 \usepackage[mathcal]{euscript}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
+\usepackage{authblk}
 \usepackage{graphicx}
 \graphicspath{ {./} }
 
@@ -23,7 +24,7 @@
 
 
 \title{{\Huge \textbf{Detecting the source language of text translated by state-of-the-art Machine Translation models}} \\ }
-\author{ \\ {\small }}
+\author{ \\ Chih-Hsiang Hsu, Chung-Hao Liao, Antoni Maciąg, Jen-Tse Wei \\ National Taiwan University}
 \date{}
 
 \newcommand{\eps}{\varepsilon}
@@ -76,48 +77,59 @@ In addition, we are curious if there is a difference between translation models 
 
 \section*{Related work}
 
-The closest work to what we attempted to do was done by Nguyen-Son et al. \cite{roundtrip} who detect, for a given English text, whether it was translated or orignally written in English, and if translated, the correct one out of a set of possible source language - translator tuples. The possible languages are Russian, German and Japanese. They use the round-translation method, utilizing the phenomenon by which, while repeatedly translating a text back and forth between two languages, each round-trip changes the text less than the previous one. Thus, given an English text $T$ which we know was translated from either Russian or German, if we generate round-trip $En \rightarrow Ru \rightarrow En$ and $En \rightarrow Ge \rightarrow En$ translations of the text, the similarity to $T$ will be higher for the translation through the language that was the original language of $T$. Therefore, the authors generate round-trip translations of a given text through a number of languages and translators, and choose the translation with the highest similarity to $T$. Its associated language-translator tuple has its own subclassifier, which is further used to determine if the text was translated or originally English. The authors prove the ability of such a model to generalize to texts translated by translators not included in training. However, a shortcoming of such an approach is that it is computationally expensive, both while training (due to training a separate subclassifier for each language-translator pair), and during inference (due to generating multiple round-trip translations).
+The closest work to what we attempted to do was done by Nguyen-Son et al. \cite{roundtrip} who detect, for a given English text, whether it was translated or orignally written in English, and if translated, the correct one out of a set of possible source language - translator tuples. The possible languages are Russian, German and Japanese. They use the round-translation method, utilizing the phenomenon by which, while repeatedly translating a text back and forth between two languages, each round-trip changes the text less than the previous one. Thus, given an English text $T$ which we know was translated from either Russian or German, if we generate round-trip $En \rightarrow Ru \rightarrow En$ and $En \rightarrow Ge \rightarrow En$ translations of the text, the similarity to $T$ will be higher for the translation through the language that was the original language of $T$. Therefore, the authors generate round-trip translations of a given text through a number of languages and translators, and choose the translation with the highest similarity to $T$. Its associated language-translator tuple has its own subclassifier, which is further used to determine if the text was translated or originally English. The authors prove the ability of such a model to generalize (i.e. still detect the source language) to texts translated by translators not included in training. However, a shortcoming of such an approach is that it is computationally expensive, both while training (due to training a separate subclassifier for each language-translator pair), and during inference (due to generating multiple round-trip translations).
 
 Kurokawa et al. \cite{canada} create a model based on Support Vector Machines (SVM), capable of determining whether a text was originally English, or translated from French. They find that certain n-grams were more frequent in translated text (semantic information), but syntactic features turn out ot be powerful as well, for example there is a "higher presence of the definite article \emph{the} and prepositions in text translated from French", and "good classification accuracy was obtained even when texts were reduced to part-of-speech sequences".
 
 Lynch \& Vogel \cite{literary}, similarly, construct an SVM based on document-level features such as number of nouns, average sentence length, word unigrams, part-of-speech (POS) bigrams. Proper names are excluded from word unigrams, as "any character or place-names could unambiguously distinguish a text". Again, the word \emph{towards} turns out to be particularly common in translation from German, and \emph{that's} (rather than \emph{that is}) - in translations from Russian. The document-level features suggest it might be easier to detect the source language of a text if it is longer, which makes such features more reliable (reduces their variance).
 
-
 \section*{Approach}
 
 \subsection*{Chosen languages}
 
-chosen languages
-grammar not similar to english
-configurational languages?
+As mentioned before, the SLD task involves detecting the source language from a given set of possible source languages. We chose Arabic, Chinese, Indonesian and Japanese to be our set. All of those are non-Indo-European languages with grammar fairly dissimilar to English, so we hypothesize that their syntactic features are carried over during translation to a bigger extent, making classification easier. For example, we hope that the rigid word order of Japanese and Chinese, which are known to be highly configurational languages, will manifest itself in the translations.
 
 \subsection*{Dataset creation}
 
-a comparison between multilingually trained models and not
+The creation of the dataset can be divided into two stages: gathering text in the original languages, and machine-translating it into English.
 
-some paragraphs shorter because removed sentences of length > 256 after tokenization
-random link sampling + at most two paragraphs from each site to avoid too many related to the same subject
-decided not to remove proper names even though one paper did. Just limited the number of paragraphs from the same site; there was really lots of diversity, and besides there was an overlap in subjects between languages (e.g. those pesky christians in both arabic and indonesian datasets) so we decided it's safer to just leave them, especially since otherwise we'd have had to replace them with something so that all the grammar of the sentence doesn't go bonkers (especially after translation), and besides for POS-based models, that doesn't make a difference either way
+In the first stage, we scraped Wikipedia articles in each language. We wrote a script which operated as follows: a pool of articles was maintained, initialized with a single article. Until a given number of text chunks was accumulated, the script selected a random, previously unvisited article from the pool. The contents of the article, regardless of their original division into sections, paragraphs etc. were concatenated into a single piece of text. From this piece, if it was sufficiently long, one or two chunks were selected, each composed of a sequence of whole sentences. Each chunk's length (in words) was 256 or more, but would have been less than 256 without the last sentence. Then a set number of links from the article, if available, was selected at random and added to the pool.
 
-paragraphs are not actually that - all sentences in a given article are concatenated together, and then we create two chunks by choosing two sequences of whole consecutive sentences, so that the length of a chunk (in words) only slightly exceeds 256 (i.e. would be below 256 if we didn't include the last sentence).
+The random link sampling, and limitation of at most two chunks from each article, were included so as to avoid the situation in which the data for a given language includes particularly many proper names related to a given topic. In such case, a model could learn to "recognize a given language" by, in fact, learning that the language is associated with that topic. These measures resulted in a very diverse dataset, with - for example - the first few chunks in the Indonesian data featuring retina cells, millenials, a Christian holiday, an Italian company, and squirrels. There was also an overlap between languages, for example Arabic data featured Christians and squirrels as well.
 
-Final dataset composition for each language (everone should describe their own, if possible):
+We decided not to remove proper names due to these measures and the fact that directly removing them from the text (or, for example, replacing them with random nouns) would have resulted in incoherent text, especially after translation, and could have ruined syntactic information.
+
+It should be noted that we made a mistake in the scraping script, by which some of the scraped paragraphs were duplicates. We suppose this was caused by Wikipedia redirections, which make previously unseen links direct the script to articles which in fact have been seen and scraped before. This was not a significant problem, for example about 2\% of the Indonesian paragraphs were duplicates. These were removed before training.
+
+Once the data in original languages was gathered, it had to be translated into English. We decided to generate, for each language, about 6400 chunks for the train set and further 700 for the test set. To avoid the situation in which a model learns the style of a particular translator, instead of the source language, we used a few different translators for each language.
+
+Parts of the test set were translated using the \href{https://huggingface.co/facebook/mbart-large-50-many-to-one-mmt}{Facebook large multilingual BART} translator, since, as mentioned before, we were curious if there would be a difference in accuracy between text translated by a multilingual translator and not. In addition, since BART uses the same decoder for all languages, we suppose the translations it generates might be similar in style regardless of their source language, making it harder for the model to learn to recognize text in a given language by recognizing the styles of its associated translators.
+
+The final dataset composition for each language (everone should describe their own, if possible):
 
 \begin{itemize}
 	\item Arabic:
 	\item Chinese:
 	\item Indonesian:
-	252 from deepl
-995 from  microsoft
-330 from  libretranslate
-^ numbers before removing duplicates, in the whole Indonesian set, there were about 2% of paragraphs to remove due to duplications
-long sentences removed also
+	\begin{itemize}
+		\item Train set: 1600 chunks translated by Google Translate, the \href{https://huggingface.co/Helsinki-NLP/opus-mt-id-en}{Helsinki-NLP/opus-mt-id-en} translator, and the \href{https://huggingface.co/facebook/mbart-large-50-many-to-one-mmt}{Facebook large multilingual BART} translator each; 252 by the \href{https://www.deepl.com/en/translator}{DeepL} translator; 995  by the Microsoft translator API; and 330 by \href{https://libretranslate.com/}{LibreTranslate}; making 6377 chunks in total,
+		\item Test set: 350 chunks translated by the same Helsinki and MBART translators each - 700 chunks in total.
+	\end{itemize}
+	These numbers were gathered before removing duplicate paragraphs, so the final numbers are, as mentioned, slightly different. In addition, due to maximum length limitations in the Helsinki translator, sentences with length (after tokenization) greater than 256 were removed.
+
 	\item Japanese:
 \end{itemize}
 
 \subsection*{Models}
 
-Four models have been created: blah blah lenin was a mushroom
+Four models have been created:
+
+\begin{itemize}
+	\item Based on a pretrained BERT, as a straightforward by possibly powerful solution and a reference point for the others,
+	\item A BERT on POS sequences, inspired by the effectiveness of POS sequences as mentioned in \cite{canada},
+	\item An SVM, inspired in turn by \cite{literary},
+	\item A neural network based on dependency tree convolutions and, again, POS tags.
+\end{itemize}
 
 more precise descriptions (everyone should describe their own):
 
@@ -128,6 +140,10 @@ more precise descriptions (everyone should describe their own):
 \subsection*{SVM}
 
 \subsection*{Dependency tree CNN}
+
+Due to the effectiveness of source language detection based solely on syntactic information as encoded by POS sequences, we hypothesize that dependency trees, which are a rich source of such information and can encode long-range syntactic relationships missed by sequential processing, may prove powerful for SLD.
+
+
 
 https://aclanthology.org/P15-2029.pdf
 ^ dependency tree CNN (?) concatenating ancestral vectors (final method)
@@ -155,8 +171,10 @@ If it turns out our model is trash, it might be either because 1. It really is t
 
 maybe we should try it on some old translation model, worse than current SOTA
 
-for validation we maybe should have different translators, so that we're sure our model learned what text translated from Korean looks like, and didn't just learn what text translated by Google Translate looks like.
-we ended up not doing that. But we did include other models for the train set to make it noisier. So maybe it’s not that bad. besides mbart was used for a lot, so if you learn mbart's style, and it's the same for japanese and koren that doesn't mean you can distinguish mbart-translated japanese from mbart-translated korean.
+compare models reduced to POS and not to validate that the whole thing was not ruined by Christians (I mean there's still like 6000 mentions of "christian" in the arabic dataset xd)
+
+for validation we maybe should have used different translators, so that we're absolutely sure our model learned what text translated from Korean looks like, and didn't just learn what text translated by Google Translate looks like.
+
 
 
 \section*{Work distribution}
@@ -218,19 +236,3 @@ I really hope I didn't make any mistakes in your names XD
 }{Yun-Nung Chen, Dilek Hakkani-Tur, Gokan Tur, Asli Celikyilmaz, Jianfeng Gao, and Li Deng. Knowledge as a Teacher: Knowledge-Guided Structural Attention Networks, 2016}
 
 \end{document}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
