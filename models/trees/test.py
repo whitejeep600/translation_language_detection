@@ -17,9 +17,9 @@ class Tester:
         self.paragraphs = paragraphs
 
     def correct(self, paragraph):
-        text_tensor = torch.stack([sentences_to_matrix([sentence])
+        text_tensor = torch.stack([sentences_to_matrix([sentence])[0]
                                    for sentence in tokenize.sent_tokenize(paragraph['paragraph'])])
-        predictions_tensor = self.model(text_tensor)
+        predictions_tensor = self.model(text_tensor.to(get_target_device()))
         return torch.mode(torch.argmax(predictions_tensor, dim=1))[0].item() == LABEL_TO_INT[paragraph['language']]
 
     def test(self):

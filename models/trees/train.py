@@ -29,7 +29,7 @@ class Trainer:
 
     def train(self):
         for i in range(self.num_epoch):
-            print(f'Epoch number {i} out of {self.num_epoch}\n')
+            print(f'Epoch number {i} out of {self.num_epoch}')
             self.train_iteration()
             self.eval_iteration()
         self.dump_losses()
@@ -50,7 +50,7 @@ class Trainer:
                 self.batch_losses.append(current_loss.item())
 
     def eval_iteration(self):
-        print('Evaluating\n')
+        print('\nEvaluating')
         all_samples_no = len(self.validation_loader.dataset)
         correct = 0
         batch_losses = []
@@ -65,8 +65,8 @@ class Trainer:
                 batch_losses.append(self.loss_function(predictions, labels))
                 progress.update(1)
         average_loss = sum(batch_losses) / len(batch_losses)
-        print(f'Average validation loss this epoch (per batch): {average_loss}\n')
-        print(f'correct: {correct} out of {all_samples_no}. Epoch ended\n')
+        print(f'Average validation loss this epoch (per batch): {average_loss}')
+        print(f'correct: {correct} out of {all_samples_no}. Epoch ended.\n')
         if correct > self.best_accuracy:
             print('Saving model to ' + self.save_path)
             torch.save(self.model.state_dict(), self.save_path)
