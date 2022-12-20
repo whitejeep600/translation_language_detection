@@ -49,6 +49,6 @@ NUM_EPOCH = 1
 
 BATCH_SIZE = 32
 
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-3
 
 SAVE_DIR = 'checkpoint'

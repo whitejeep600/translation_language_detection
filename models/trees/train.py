@@ -29,7 +29,7 @@ class Trainer:
 
     def train(self):
         for i in range(self.num_epoch):
-            print(f'Epoch number {i} out of {self.num_epoch}')
+            print(f'Epoch number {i} out of {self.num_epoch}\n')
             self.train_iteration()
             self.eval_iteration()
         self.dump_losses()
@@ -50,17 +50,20 @@ class Trainer:
                 self.batch_losses.append(current_loss.item())
 
     def eval_iteration(self):
+        print('Evaluating\n')
         all_samples_no = len(self.validation_loader.dataset)
         correct = 0
         batch_losses = []
         self.model.eval()
         with torch.no_grad():
+            progress = tqdm(total=len(self.validation_loader.dataset) // BATCH_SIZE, desc="Evaluated batch")
             for batch in iter(self.validation_loader):
                 sentences = batch['text']
                 labels = batch['label']
                 predictions = self.model(sentences)
                 correct += get_number_of_correct(predictions, labels)
                 batch_losses.append(self.loss_function(predictions, labels))
+                progress.update(1)
         average_loss = sum(batch_losses) / len(batch_losses)
         print(f'Average validation loss this epoch (per batch): {average_loss}\n')
         print(f'correct: {correct} out of {all_samples_no}. Epoch ended\n')
