@@ -32,6 +32,7 @@ class Trainer:
             print(f'Epoch number {i} out of {self.num_epoch}')
             self.train_iteration()
             self.eval_iteration()
+        self.dump_losses()
 
     def train_iteration(self):
         self.model.train()
