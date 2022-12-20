@@ -1,0 +1,14 @@
+results after one epoch:
+
+1e-4
+Average validation loss this epoch (per batch): 1.371401309967041                                                                                                                   
+correct: 9079 out of 30115. Epoch ended
+
+1e-3
+Average validation loss this epoch (per batch): 1.3237519264221191
+correct: 11276 out of 30115. Epoch ended
+
+1e-2
+Average validation loss this epoch (per batch): 1.2855244874954224
+correct: 12098 out of 30115. Epoch ended.
+
