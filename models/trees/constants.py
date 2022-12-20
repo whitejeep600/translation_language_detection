@@ -1,4 +1,4 @@
-LANGUAGES = ['arabic', 'chinese' 'indonesian', 'japanese']
+LANGUAGES = ['arabic', 'chinese', 'indonesian', 'japanese']
 
 LABEL_TO_INT = {
     'arabic': 0,
@@ -45,7 +45,7 @@ D = CONVOLUTION_LENGTH * NUM_POS_TAGS
 # most sentences have at most 64 words, so we can truncate/pad to this length
 MAX_SENTENCE_LENGTH = 64
 
-NUM_EPOCH = 2
+NUM_EPOCH = 1
 
 BATCH_SIZE = 32
 
