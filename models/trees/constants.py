@@ -1,4 +1,4 @@
-LANGUAGES = ['arabic', 'indonesian']
+LANGUAGES = ['arabic', 'chinese' 'indonesian', 'japanese']
 
 LABEL_TO_INT = {
     'arabic': 0,
@@ -8,7 +8,10 @@ LABEL_TO_INT = {
 }
 
 TEST_TRANSLATORS = {'indonesian': ['helsinki', 'mbart'],
-                    'arabic': ['Helsinki-NLP/opus-mt-ar-en', 'facebook/mbart-large-50-many-to-one-mmt']}
+                    'arabic': ['Helsinki-NLP/opus-mt-ar-en', 'facebook/mbart-large-50-many-to-one-mmt'],
+                    'japanese': ['staka', 'mbart'],
+                    'chinese': ['helsinki', 'mbart'],
+                    }
 
 NUM_LABELS = len(LABEL_TO_INT)
 
