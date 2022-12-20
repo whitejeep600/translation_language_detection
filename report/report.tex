@@ -65,15 +65,10 @@
 
 \section*{Source language detection}
 
-mention that it isn't a common task; related work here too
+Although there is some preexisting work on tasks similar to the one we chose for the assignment, it is not a standard NLP task and to the best of our knowledge, there is no work with exactly the same problem formulation. The formulation is: given a text machine-translated into English from a known set of source languages, detect the source language. We will refer to the problem as Source Language Detection (SLD).
 
-motivation: test sota models, if detection possible, we're curious which features will be  s a l i e n t  (xd) for detection
+We are motivated by the following: in human translation, clues as to the original language in the form of both syntactic and semantic information tend to get unconsciously carried over to the translated text \cite{literary}, making it possible to detect the original language. We are curious if that is also the case for currect state-of-the-art models for Machine Translation, and if so, what kinds of models will make SLD possible and what features of the translated text will be salient for detection. If the translation models are good enough, our obtained accuracy should not be considerably higher than random guessing. In addition, we are curious if there is a difference between translation models which were trained multilingually and ones that were not. We hypothesize that for the former, the task might be more difficult because such models have learned on languages with various syntactic structures, which could make them less likely to carry syntactic features of a particular source language into the translation.
 
-Gather lots of text documents in a few languages, use machine translation models to translate them to english, feed them to some kind of model, telling it what language each document was translated from. See if it can learn to recognize that. If the translation models are good enough, that should be impossible.
-
-some previous papers have shown it’s possible to detect the original language of a human-generated translation
-
-relevant to the lecture becaaause 1. we use deep learning 2. we evaluate sota deep learning
 
 \section*{Related work}
 
@@ -84,6 +79,10 @@ https://aclanthology.org/2021.naacl-main.462.pdf
 https://arxiv.org/pdf/1910.06558.pdf
 . It uses back translation method. 
 
+we have not been able to find an attempt to create a source language detector oblivious of the used translator
+
+in comparison to Son, ours would be much faster if it works
+and oblivious to the translator used
 
 https://aclanthology.org/W18-1603.pdf
 ^ translated text detection on Chinese. 
@@ -205,7 +204,26 @@ I really hope I didn't make any mistakes in your names XD
 	\begin{itemize}
 		\item todo
 	\end{itemize}
+	
+	\item Every member:
+	\begin{itemize}
+		\item Writing the part of the report about their respective dataset and model.
+	\end{itemize}
 \end{itemize}
+
+
+\bibliographystyle{ieeetr}
+\begin{thebibliography}{99}
+
+\bibitem{literary}
+   \href{https://aclanthology.org/C12-2076.pdf}{Gerard Lynch and Carl Vogel. Towards the Automatic Detection of the Source Language of a Literary Translation. Proceedings of COLING 2012}
+
+\bibitem{roundtrip}
+   \href{ https://aclanthology.org/2021.naacl-main.462.pdf }{Hoang-Quoc Nguyen-Son, Tran Phuong Thao, Seira Hidano, Ishita Gupta, and Shinsaku Kiyomoto. Machine Translated Text Detection Through Text Similarity with Round-Trip Translation Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics, 2021}
+
+\bibitem{back}
+   \href{https://arxiv.org/pdf/1910.06558.pdf{Hoang-Quoc Nguyen-Son, Tran Phuong Thao, Seira Hidano,and Shinsaku Kiyomoto. Detecting Machine-Translated Text using Back Translation. Proceedings of the 12th International Conference on Natural Language Generation, 2019}
+  
 
 
 
