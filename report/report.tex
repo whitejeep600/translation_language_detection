@@ -22,7 +22,7 @@
 }
 
 
-\title{{\Huge \textbf{}} \\ }
+\title{{\Huge \textbf{Detecting the source language of text translated by state-of-the-art Machine Translation models}} \\ }
 \author{ \\ {\small }}
 \date{}
 
@@ -61,49 +61,26 @@
 
 \begin{document}
 
+\maketitle
+
 \section*{Abstract}
 
 \section*{Source language detection}
 
 Although there is some preexisting work on tasks similar to the one we chose for the assignment, it is not a standard NLP task and to the best of our knowledge, there is no work with exactly the same problem formulation. The formulation is: given a text machine-translated into English from a known set of source languages, detect the source language. We will refer to the problem as Source Language Detection (SLD).
 
-We are motivated by the following: in human translation, clues as to the original language in the form of both syntactic and semantic information tend to get unconsciously carried over to the translated text \cite{literary}, making it possible to detect the original language. We are curious if that is also the case for currect state-of-the-art models for Machine Translation, and if so, what kinds of models will make SLD possible and what features of the translated text will be salient for detection. If the translation models are good enough, our obtained accuracy should not be considerably higher than random guessing. In addition, we are curious if there is a difference between translation models which were trained multilingually and ones that were not. We hypothesize that for the former, the task might be more difficult because such models have learned on languages with various syntactic structures, which could make them less likely to carry the syntactic features of a particular source language over into the translation.
+We are motivated by the following: in human translation, clues as to the original language in the form of both syntactic and semantic information tend to get unconsciously carried over to the translated text \cite{literary}, making it possible to detect the original language. We are curious if that is also the case for currect state-of-the-art models for Machine Translation, and if so, what kinds of models will make SLD possible and what features of the translated text will be salient for detection. If the translation models are good enough, our obtained accuracy should not be considerably higher than random guessing.
+
+In addition, we are curious if there is a difference between translation models which were trained multilingually and ones that were not. We hypothesize that for the former, the task might be more difficult because such models have learned on languages with various syntactic structures, which could make them less likely to carry the syntactic features of a particular source language over into the translation.
 
 
 \section*{Related work}
 
-Nguyen-Son et al. \cite{roundtrip} detect, for a given English text, whether it was translated or orignally written in English, and if translated, the correct one out of a set of possible source language - translator tuples. The possible languages are Russian, German and Japanese. They use the round-translation method. It utilizes the phenomenon by which, while repeatedly translating a text back and forth between two languages, each round-trip changes the text less than the previous one. Thus, given an English text $T$ which we know was translated from either Russian or German, if we generate round-trip $En \rightarrow Ru \rightarrow En$ and $En \rightarrow Ge \rightarrow En$ translations of the text, the similarity to $T$ will be higher for the translation through the language that was the original language of $T$. Therefore, the authors generate round-trip translations of a given text through a number of languages and translators, and choose the translation with the highest similarity to $T$. Its associated language-translator tuple has its own subclassifier, which is further used to determine if the text was translated or originally English. They prove the ability of such a model to generalize to texts translated by translators not included in training.
+The closest work to what we attempted to do was done by Nguyen-Son et al. \cite{roundtrip} who detect, for a given English text, whether it was translated or orignally written in English, and if translated, the correct one out of a set of possible source language - translator tuples. The possible languages are Russian, German and Japanese. They use the round-translation method, utilizing the phenomenon by which, while repeatedly translating a text back and forth between two languages, each round-trip changes the text less than the previous one. Thus, given an English text $T$ which we know was translated from either Russian or German, if we generate round-trip $En \rightarrow Ru \rightarrow En$ and $En \rightarrow Ge \rightarrow En$ translations of the text, the similarity to $T$ will be higher for the translation through the language that was the original language of $T$. Therefore, the authors generate round-trip translations of a given text through a number of languages and translators, and choose the translation with the highest similarity to $T$. Its associated language-translator tuple has its own subclassifier, which is further used to determine if the text was translated or originally English. The authors prove the ability of such a model to generalize to texts translated by translators not included in training. However, a shortcoming of such an approach is that it is computationally expensive, both while training (due to training a separate subclassifier for each language-translator pair), and during inference (due to generating multiple round-trip translations).
 
-https://aclanthology.org/2021.naacl-main.462.pdf 
- It detects the translated text using round-trip method. 
+Kurokawa et al. \cite{canada} create a model based on Support Vector Machines (SVM), capable of determining whether a text was originally English, or translated from French. They find that certain n-grams were more frequent in translated text (semantic information), but syntactic features turn out ot be powerful as well, for example there is a "higher presence of the definite article \emph{the} and prepositions in text translated from French", and "good classification accuracy was obtained even when texts were reduced to part-of-speech sequences".
 
-
-https://arxiv.org/pdf/1910.06558.pdf
-. It uses back translation method. 
-
-we have not been able to find an attempt to create a source language detector oblivious of the used translator - no wait, the round-trip does that
-
-in comparison to Son, ours would be much faster if it works
-and oblivious to the translator used, both in training (multiple subclassifiers) and in recognition (multiple translations)
-
-https://aclanthology.org/W18-1603.pdf
-^ translated text detection on Chinese, dependency trees
-
-
-https://www.cs.cmu.edu/~dkurokaw/publications/MTS-2009-Kurokawa.pdf
-
-^This paper detects text translated from french, they say some n-grams were very frequent, and also more articles and prepositions than in originally english text
-
-"good classification accuracy was obtained even when texts were reduced to part-of-speech sequences"  maybe use some model based on POS sequences, then?
-
-
-https://aclanthology.org/C12-2076.pdf
-
-^his paper is interesting because the task is similar to ours. Among others they create vector representations for articles based on some document-level metrics, and SVM based on that. Certain 2-grams were very frequent for translations from certain languages
-
-Maybe easier to recognize longer text (for reliable document-level statistics), which is why we use whole paragraphs rather than sentences
-
-
+Lynch \& Vogel \cite{literary}, similarly, construct an SVM based on document-level features such as number of nouns, average sentence length, word unigrams, part-of-speech (POS) bigrams. Proper names are excluded from word unigrams, as "any character or place-names could unambiguously distinguish a text". Again, the word \emph{towards} turns out to be particularly common in translation from German, and \emph{that's} (rather than \emph{that is}) - in translations from Russian. The document-level features suggest it might be easier to detect the source language of a text if it is longer, which makes such features more reliable (reduces their variance).
 
 
 \section*{Approach}
@@ -134,6 +111,7 @@ Final dataset composition for each language (everone should describe their own, 
 995 from  microsoft
 330 from  libretranslate
 ^ numbers before removing duplicates, in the whole Indonesian set, there were about 2% of paragraphs to remove due to duplications
+long sentences removed also
 	\item Japanese:
 \end{itemize}
 
@@ -178,7 +156,7 @@ If it turns out our model is trash, it might be either because 1. It really is t
 maybe we should try it on some old translation model, worse than current SOTA
 
 for validation we maybe should have different translators, so that we're sure our model learned what text translated from Korean looks like, and didn't just learn what text translated by Google Translate looks like.
-we ended up not doing that. But we did include other models for the train set to make it noisier. So maybe it’s not that bad. 
+we ended up not doing that. But we did include other models for the train set to make it noisier. So maybe it’s not that bad. besides mbart was used for a lot, so if you learn mbart's style, and it's the same for japanese and koren that doesn't mean you can distinguish mbart-translated japanese from mbart-translated korean.
 
 
 \section*{Work distribution}
@@ -225,9 +203,6 @@ I really hope I didn't make any mistakes in your names XD
 
 \bibitem{back}
    \href{https://arxiv.org/pdf/1910.06558.pdf}{Hoang-Quoc Nguyen-Son, Tran Phuong Thao, Seira Hidano, and Shinsaku Kiyomoto. Detecting Machine-Translated Text using Back Translation. Proceedings of the 12th International Conference on Natural Language Generation, 2019}
-  
-\bibitem{chinese}
-   \href{https://aclanthology.org/W18-1603.pdf}{Hai Hu, Wen Li, Sandra Kubler. Detecting Syntactic Features of Translated Chinese. Proceedings of the Second Workshop on Stylistic Variation, 2018}
 
 \bibitem{canada}
    \href{https://www.cs.cmu.edu/~dkurokaw/publications/MTS-2009-Kurokawa.pdf}{David Kurokawa, Cyril Goutte and Pierre Isabelle. Automatic Detection of Translated Text and its Impact on Machine Translation. In Proceedings of Machine Translation Summit XII, 2012}
