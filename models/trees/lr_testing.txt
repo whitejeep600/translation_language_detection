@@ -8,7 +8,15 @@ correct: 9079 out of 30115. Epoch ended
 Average validation loss this epoch (per batch): 1.3237519264221191
 correct: 11276 out of 30115. Epoch ended
 
+5e-3
+Average validation loss this epoch (per batch): 1.3084063529968262
+correct: 11840 out of 30115. Epoch ended.
+
 1e-2
 Average validation loss this epoch (per batch): 1.2855244874954224
 correct: 12098 out of 30115. Epoch ended.
+
+5e-2
+Average validation loss this epoch (per batch): 1.294352650642395
+correct: 12075 out of 30115. Epoch ended.
 
