@@ -46,6 +46,7 @@ class Trainer:
             current_loss.backward()
             self.optimizer.step()
             progress.update(1)
+            print(current_loss.item())
             if i % 512 == 0:
                 self.batch_losses.append(current_loss.item())
 

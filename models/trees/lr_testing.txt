@@ -20,3 +20,9 @@ correct: 12098 out of 30115. Epoch ended.
 Average validation loss this epoch (per batch): 1.294352650642395
 correct: 12075 out of 30115. Epoch ended.
 
+
+new model:
+
+1e-2:
+Average validation loss this epoch (per batch): 1.3798285722732544
+correct: 8931 out of 30115. Epoch ended

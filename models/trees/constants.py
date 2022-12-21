@@ -47,10 +47,10 @@ D = CONVOLUTION_LENGTH * NUM_POS_TAGS
 # most sentences have at most 64 words, so we can truncate/pad to this length
 MAX_SENTENCE_LENGTH = 64
 
-NUM_EPOCH = 4
+NUM_EPOCH = 1
 
 BATCH_SIZE = 32
 
-LEARNING_RATE = 1e-2
+LEARNING_RATE = 5e-3
 
 SAVE_DIR = 'checkpoint'

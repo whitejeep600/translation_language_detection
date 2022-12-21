@@ -7,9 +7,11 @@ from utils import get_target_device
 class Convolution(nn.Module):
     def __init__(self, num_filters, representation_dim):
         super().__init__()
-        self.filters = torch.nn.Parameter(torch.rand(num_filters, representation_dim)).to(get_target_device())
-        self.biases = torch.nn.Parameter(torch.rand(num_filters)).to(get_target_device())
-        # each filter corresponds to a row in the matrix, whose dot product with each word representation
+        self.filters = torch.nn.Parameter(torch.rand(num_filters, representation_dim,
+                                                     device=get_target_device(),
+                                                     requires_grad=True))
+        self.biases = torch.nn.Parameter(torch.rand(num_filters, device=get_target_device(), requires_grad=True))
+# each filter corresponds to a row in the matrix, whose dot product with each word representation
         # is calculated. Afterwards, the maximum value for each filter is selected.
 
     def forward(self, x):
@@ -25,9 +27,9 @@ class TranslationDetector(nn.Module):
         super(TranslationDetector, self).__init__()
         self.network = nn.Sequential(
             Convolution(num_filters, representation_dim),
-            nn.Sigmoid(),
+            nn.ReLU(),
             nn.Linear(num_filters, num_filters),  # first layer, preserving dimension
-            nn.Sigmoid(),
+            nn.ReLU(),
             nn.Linear(num_filters, num_filters),  # second layer, preserving dimension
             nn.Sigmoid(),
             nn.Linear(num_filters, num_classes),  # conversion to logits
