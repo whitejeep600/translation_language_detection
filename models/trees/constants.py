@@ -10,7 +10,7 @@ LABEL_TO_INT = {
 TEST_TRANSLATORS = {'indonesian': ['helsinki', 'mbart'],
                     'arabic': ['Helsinki-NLP/opus-mt-ar-en', 'facebook/mbart-large-50-many-to-one-mmt'],
                     'japanese': ['staka', 'mbart'],
-                    'chinese': ['helsinki', 'mbart'],
+                    'chinese': ['helsinki', 'mBART'],
                     }
 
 NUM_LABELS = len(LABEL_TO_INT)
