@@ -20,7 +20,11 @@ class Tester:
         text_tensor = torch.stack([sentences_to_matrix([sentence])[0]
                                    for sentence in tokenize.sent_tokenize(paragraph['paragraph'])])
         predictions_tensor = self.model(text_tensor.to(get_target_device()))
-        return torch.mode(torch.argmax(predictions_tensor, dim=1))[0].item() == LABEL_TO_INT[paragraph['language']]
+        # sentence number, class logit
+        logit_sums = torch.sum(predictions_tensor, dim=0)
+        assert logit_sums.size(dim=0) == 1
+        assert logit_sums.size(dim=1) == 4
+        return torch.argmax(logit_sums).item() == LABEL_TO_INT[paragraph['language']]
 
     def test(self):
         correct = 0
