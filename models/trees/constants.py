@@ -15,8 +15,6 @@ TEST_TRANSLATORS = {'indonesian': ['helsinki', 'mbart'],
 
 NUM_LABELS = len(LABEL_TO_INT)
 
-CONVOLUTION_LENGTH = 8
-
 POS_TO_INT = {
     'ADJ': 0,
     'ADP': 1,
@@ -38,6 +36,10 @@ POS_TO_INT = {
 }
 
 NUM_POS_TAGS = len(POS_TO_INT) - 1  # not counting the 'X' ('other', 'unrecognized') tag
+
+CONVOLUTION_LENGTH = 8
+
+NUM_FILTERS = 128
 
 # word representation dimension
 D = CONVOLUTION_LENGTH * NUM_POS_TAGS

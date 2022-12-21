@@ -5,7 +5,8 @@ from constants import CONVOLUTION_LENGTH, POS_TO_INT, NUM_POS_TAGS, D, \
     MAX_SENTENCE_LENGTH
 
 
-pipeline = stanza.Pipeline('en', processors='tokenize,mwt,pos,lemma,depparse', use_gpu=True, tokenize_pretokenized=True)
+pipeline = stanza.Pipeline('en', processors='tokenize,mwt,pos,lemma,depparse',
+                           use_gpu=True, tokenize_pretokenized=True, download_method=None)
 
 
 def process_tree(tree):

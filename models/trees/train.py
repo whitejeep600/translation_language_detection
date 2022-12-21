@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from constants import LABEL_TO_INT, NUM_EPOCH, NUM_LABELS, \
-    MAX_SENTENCE_LENGTH, D, LEARNING_RATE, SAVE_DIR, BATCH_SIZE
+    MAX_SENTENCE_LENGTH, D, LEARNING_RATE, SAVE_DIR, BATCH_SIZE, NUM_FILTERS
 from dataset import TranslationDetectionDataset
 from model import TranslationDetector
 from readers import read_data
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     validation_loader = create_dataloader(validation_split)
     train_loader = create_dataloader(train_split)
     target_device = get_target_device()  # always using GPU if available
-    model_no_device = TranslationDetector(D, MAX_SENTENCE_LENGTH, NUM_LABELS)
+    model_no_device = TranslationDetector(NUM_FILTERS, D, NUM_LABELS)
     model = model_no_device.to(target_device)
     optimizer = SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9)
     loss_function = torch.nn.CrossEntropyLoss()

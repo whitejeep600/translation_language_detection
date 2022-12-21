@@ -4,27 +4,33 @@ import torch.nn as nn
 from utils import get_target_device
 
 
-class InitialDimReduction(nn.Module):
-    def __init__(self, sequence_length):
+class Convolution(nn.Module):
+    def __init__(self, num_filters, representation_dim):
         super().__init__()
-        self.vector = torch.nn.Parameter(torch.rand(sequence_length)).to(get_target_device())
-        assert self.vector.requires_grad
+        self.filters = torch.nn.Parameter(torch.rand(num_filters, representation_dim)).to(get_target_device())
+        self.biases = torch.nn.Parameter(torch.rand(num_filters)).to(get_target_device())
+        # each filter corresponds to a row in the matrix, whose dot product with each word representation
+        # is calculated. Afterwards, the maximum value for each filter is selected.
 
     def forward(self, x):
-        res = torch.matmul(x, self.vector)
-        return res
+        res = torch.matmul(self.filters, x)
+        maximum = torch.max(res, dim=2).values
+        # row-wise max (but dim=2 because the first dimension is position in batch)
+        with_bias = maximum + self.biases
+        return with_bias
 
 
 class TranslationDetector(nn.Module):
-    def __init__(self, representation_dim, sequence_length, num_classes):
+    def __init__(self, num_filters, representation_dim, num_classes):
         super(TranslationDetector, self).__init__()
         self.network = nn.Sequential(
-            InitialDimReduction(sequence_length),  # converting sentence matrix representation to vector representation
-            nn.Linear(representation_dim, representation_dim),  # first layer, preserving dimension
+            Convolution(num_filters, representation_dim),
             nn.Sigmoid(),
-            nn.Linear(representation_dim, representation_dim),  # second layer, preserving dimension
+            nn.Linear(num_filters, num_filters),  # first layer, preserving dimension
             nn.Sigmoid(),
-            nn.Linear(representation_dim, num_classes),  # conversion to logits
+            nn.Linear(num_filters, num_filters),  # second layer, preserving dimension
+            nn.Sigmoid(),
+            nn.Linear(num_filters, num_classes),  # conversion to logits
         )
 
     def forward(self, batch):
