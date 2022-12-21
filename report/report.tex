@@ -143,6 +143,7 @@ more precise descriptions (everyone should describe their own):
 
 Due to the effectiveness of source language detection based solely on syntactic information as encoded by POS sequences, we hypothesize that dependency trees, which are a rich source of such information and can encode long-range syntactic relationships missed by sequential processing, may prove powerful for SLD.
 
+If a Deep Learning model is to be used, first it needs to be decided how to feed it the information about the dependency tree. Ma et al. \cite{ancestors} propose applying a convolution to the tree, as follows: first, vector representations of each word's $k$ ancestors are concatenated to its own representation in the order of ancestry (with $k$ being a parameter). The vectors are padded if there are not enough ancestors. Thus we obtain a sentence representation in $l$ vectors, with $l$ being the length of the sentence. Then, $n$ (which is also a parameter) learnable convolution filters are applied to each vector, with each filter applying the dot product between its own learnable vector and the input, adding learnable bias, and applying a non-linear activation. Thus we obtain $l$ features for each filter. Max-pooling is applied, i.e. the maximum feature is chosen for each filter. Thus we finally obtain an input representation with $n$ features.
 
 
 https://aclanthology.org/P15-2029.pdf
