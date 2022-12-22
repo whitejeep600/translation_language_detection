@@ -37,7 +37,8 @@ class Trainer:
     def train_iteration(self):
         self.model.train()
         progress = tqdm(total=len(self.train_loader.dataset) // BATCH_SIZE, desc="Processed batch")
-        for i, batch in enumerate(self.train_loader):
+        batch = next(iter(self.train_loader))
+        for i, _ in enumerate(self.train_loader):
             sentences = batch['text']
             labels = batch['label']
             predictions = self.model(sentences)
@@ -46,6 +47,7 @@ class Trainer:
             current_loss.backward()
             self.optimizer.step()
             progress.update(1)
+            print(current_loss.item())
             if i % 512 == 0:
                 self.batch_losses.append(current_loss.item())
 

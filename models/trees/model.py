@@ -7,11 +7,11 @@ from utils import get_target_device
 class InitialDimReduction(nn.Module):
     def __init__(self, sequence_length):
         super().__init__()
-        self.vector = torch.nn.Parameter(torch.rand(sequence_length)).to(get_target_device())
-        assert self.vector.requires_grad
+        self.vector = torch.nn.Parameter(torch.rand(sequence_length, device=get_target_device(), requires_grad=True))
+        self.bias = torch.nn.Parameter(torch.rand(sequence_length, device=get_target_device(), requires_grad=True))
 
     def forward(self, x):
-        res = torch.matmul(x, self.vector)
+        res = torch.matmul(x, self.vector) + self.bias
         return res
 
 
@@ -20,10 +20,9 @@ class TranslationDetector(nn.Module):
         super(TranslationDetector, self).__init__()
         self.network = nn.Sequential(
             InitialDimReduction(sequence_length),  # converting sentence matrix representation to vector representation
-            nn.Linear(representation_dim, representation_dim),  # first layer, preserving dimension
-            nn.Sigmoid(),
+            nn.ReLU(),
             nn.Linear(representation_dim, representation_dim),  # second layer, preserving dimension
-            nn.Sigmoid(),
+            nn.ReLU(),
             nn.Linear(representation_dim, num_classes),  # conversion to logits
         )
 
