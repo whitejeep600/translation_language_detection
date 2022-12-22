@@ -5,10 +5,10 @@ from utils import get_target_device
 
 
 class InitialDimReduction(nn.Module):
-    def __init__(self, sequence_length):
+    def __init__(self,representation_dim, sequence_length):
         super().__init__()
         self.vector = torch.nn.Parameter(torch.rand(sequence_length, device=get_target_device(), requires_grad=True))
-        self.bias = torch.nn.Parameter(torch.rand(sequence_length, device=get_target_device(), requires_grad=True))
+        self.bias = torch.nn.Parameter(torch.rand(representation_dim, device=get_target_device(), requires_grad=True))
 
     def forward(self, x):
         res = torch.matmul(x, self.vector) + self.bias
@@ -19,7 +19,7 @@ class TranslationDetector(nn.Module):
     def __init__(self, representation_dim, sequence_length, num_classes):
         super(TranslationDetector, self).__init__()
         self.network = nn.Sequential(
-            InitialDimReduction(sequence_length),  # converting sentence matrix representation to vector representation
+            InitialDimReduction(representation_dim, sequence_length),  # converting sentence matrix representation to vector representation
             nn.ReLU(),
             nn.Linear(representation_dim, representation_dim),  # second layer, preserving dimension
             nn.ReLU(),

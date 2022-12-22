@@ -37,8 +37,7 @@ class Trainer:
     def train_iteration(self):
         self.model.train()
         progress = tqdm(total=len(self.train_loader.dataset) // BATCH_SIZE, desc="Processed batch")
-        batch = next(iter(self.train_loader))
-        for i, _ in enumerate(self.train_loader):
+        for i, batch in enumerate(self.train_loader):
             sentences = batch['text']
             labels = batch['label']
             predictions = self.model(sentences)
@@ -94,7 +93,7 @@ if __name__ == '__main__':
     validation_loader = create_dataloader(validation_split)
     train_loader = create_dataloader(train_split)
     target_device = get_target_device()  # always using GPU if available
-    model_no_device = TranslationDetector(NUM_FILTERS, D, NUM_LABELS)
+    model_no_device = TranslationDetector(D, MAX_SENTENCE_LENGTH, NUM_LABELS)
     model = model_no_device.to(target_device)
     optimizer = SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9)
     loss_function = torch.nn.CrossEntropyLoss()
