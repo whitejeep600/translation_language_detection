@@ -23,6 +23,32 @@ correct: 12075 out of 30115. Epoch ended.
 
 new model:
 
-1e-2:
-Average validation loss this epoch (per batch): 1.3798285722732544
-correct: 8931 out of 30115. Epoch ended
+5e-3
+Epoch number 0 out of 1
+Processed batch: 8471it [1:04:54,  2.18it/s]                                    
+
+Evaluating
+Evaluated batch: 100%|████████████████████████| 941/941 [06:45<00:00,  2.22it/s]Average validation loss this epoch (per batch): 1.3373428583145142
+correct: 10819 out of 30115. Epoch ended.
+
+Saving model to checkpoint/model.pt
+
+
+new model second training:
+Epoch number 1 out of 5
+Processed batch: 8471it [1:20:16,  1.76it/s]                                    
+
+Evaluating
+Evaluated batch: 942it [06:48,  3.14it/s]                                       Average validation loss this epoch (per batch): 1.3187209367752075
+correct: 11327 out of 30115. Epoch ended.
+
+Saving model to checkpoint/model.pt
+Evaluated batch: 942it [06:48,  2.31it/s]
+Epoch number 2 out of 5
+Processed batch: 8471it [1:04:14,  2.20it/s]                                    
+
+Evaluating
+Evaluated batch: 100%|████████████████████████| 941/941 [06:47<00:00,  2.11it/s]Average validation loss this epoch (per batch): 1.320967197418213
+correct: 11261 out of 30115. Epoch ended.
+
+Evaluated batch: 942it [06:47,  2.31it/s] 
