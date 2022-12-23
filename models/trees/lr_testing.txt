@@ -52,3 +52,11 @@ Evaluated batch: 100%|███████████████████�
 correct: 11261 out of 30115. Epoch ended.
 
 Evaluated batch: 942it [06:47,  2.31it/s] 
+
+
+previous with relu:
+Evaluating
+Evaluated batch: 100%|█████████████████████████████████████████| 941/941 [06:52<00:00,  2.33it/s]Average validation loss this epoch (per batch): 1.240763545036316
+correct: 13258 out of 30115. Epoch ended.
+
+
