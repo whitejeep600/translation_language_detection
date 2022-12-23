@@ -151,11 +151,11 @@ Zhang et al. \cite{adjacency} propose an alternative method, by which word repre
 
 One may notice that neither of these approaches encodes information about the nature of dependencies between words, only the structure of the dependency tree. In fact, Zhang et al. mention that including such information does not lead to any improvement in performance.
 
+We based our model on the one in Ma et al. \cite{ancestors}. However, we also applied some modifications. Most importantly, as our word embeddings, we apply one-hot vectors representing POS tags, motivated by the succcess of earlier POS-based models, mentioned above. The dimension of these vetors is $P=16$. We do not include dependency tree siblings in the convolution. We also simplify the convolution as our experiments show that such simplification actually leads to a slight increase in accuracy. In detail, the model works, as follows:
 
-
-and explain who chose one-hot POS embedding and not to include siblings oh and why dependency parsing rather than abstract meaning representation (why? syntax)
-explain how sentence length, number of ancestors etc were chosen
-mention that pos kinda also encodes relationship nature
+First, for each word in the input sentence, a vector representation is obtained just as in \cite{ancestors}, by concatenating $k$ ancestor vectors. $k$ is set to $8$, as, the dependency trees of most sentences from the dataset do not exceed $8$ in height. If there are not enough ancestors, representations are padded with zeroes. Thus, the dimensionality of each representation is $D=P\cdot k = 16 \cdot 8 = 128$. The vectors are combined into a matrix $M \in \mathbb{R}^{D, L}$, with the vector representing the $i$-th word becoming the $i$-th column, and zeroes used for padding to length $L$. This matrix is then multiplied by a single, learnable convolution vector $c \in \mathbb{R}^{L}$, and a learnable bias vector $b \in \mathbb{R}^{L}$ is added to obtain the final representation $r \in \mathbb{R}^{D}$. Note that unlike in \cite{ancestors}, the $i$-th feature of $r$ is calculated as the dot procuct of $c$ with the $i$-th features of all vector representations (plus bias), and not with one, whole vector representation. $r$ is then fed to a $ReLU$ nonlinearlity, followed by a fully-connected affine layer, another $ReLU$ and a final affine transformation to logits.
+ 
+The model, as described here, is trained and operates on a sentence basis. For fair comparison with the other models, inference for a whole paragraph is performed by running it separately for every sentence and then simply summing the output logits. The label corresponding to the highest logit sum is chosen as prediction.
 
 \section*{Results}
 
