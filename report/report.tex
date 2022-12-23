@@ -105,7 +105,7 @@ Once the data in original languages was gathered, it had to be translated into E
 
 Parts of the test set were translated using the \href{https://huggingface.co/facebook/mbart-large-50-many-to-one-mmt}{Facebook large multilingual BART} translator, since, as mentioned before, we were curious if there would be a difference in accuracy between text translated by a multilingual translator and not. In addition, since BART uses the same decoder for all languages, we suppose the translations it generates might be similar in style regardless of their source language, making it harder for the model to learn to recognize text in a given language by recognizing the styles of its associated translators.
 
-The final dataset composition for each language (everone should describe their own, if possible):
+The final dataset composition for each language:
 
 \begin{itemize}
 	\item Arabic:
@@ -131,7 +131,7 @@ Four models have been created:
 	\item A neural network based on dependency tree convolutions and, again, POS tags.
 \end{itemize}
 
-more precise descriptions (everyone should describe their own):
+More precise descriptions of each model are provided in the sections below.
 
 \subsubsection*{Bert}
 
@@ -151,7 +151,7 @@ Zhang et al. \cite{adjacency} propose an alternative method, by which word repre
 
 One may notice that neither of these approaches encodes information about the nature of dependencies between words, only the structure of the dependency tree. In fact, Zhang et al. mention that including such information does not lead to any improvement in performance.
 
-We based our model on the one in Ma et al. \cite{ancestors}. However, we also applied some modifications. Most importantly, as our word embeddings, we apply one-hot vectors representing POS tags, motivated by the succcess of earlier POS-based models, mentioned above. The dimension of these vetors is $P=16$. We do not include dependency tree siblings in the convolution. We also simplify the convolution as our experiments show that such simplification actually leads to a slight increase in accuracy. In detail, the model works, as follows:
+We based our model on the one in Ma et al. \cite{ancestors}. However, we also applied some modifications. Most importantly, as our word embeddings, we apply one-hot vectors representing POS tags, motivated by the succcess of earlier POS-based models, mentioned above, and by the objective to analyze syntax only, allowing us to drop semantic information. The dimension of these vetors is $P=16$. We do not include dependency tree siblings in the convolution. We also simplify the convolution as our experiments show that such simplification actually leads to a slight increase in accuracy. In detail, the model works, as follows:
 
 First, for each word in the input sentence, a vector representation is obtained just as in \cite{ancestors}, by concatenating $k$ ancestor vectors. $k$ is set to $8$, as, the dependency trees of most sentences from the dataset do not exceed $8$ in height. If there are not enough ancestors, representations are padded with zeroes. Thus, the dimensionality of each representation is $D=P\cdot k = 16 \cdot 8 = 128$. The vectors are combined into a matrix $M \in \mathbb{R}^{D, L}$, with the vector representing the $i$-th word becoming the $i$-th column, and zeroes used for padding to length $L$. This matrix is then multiplied by a single, learnable convolution vector $c \in \mathbb{R}^{L}$, and a learnable bias vector $b \in \mathbb{R}^{L}$ is added to obtain the final representation $r \in \mathbb{R}^{D}$. Note that unlike in \cite{ancestors}, the $i$-th feature of $r$ is calculated as the dot procuct of $c$ with the $i$-th features of all vector representations (plus bias), and not with one, whole vector representation. $r$ is then fed to a $ReLU$ nonlinearlity, followed by a fully-connected affine layer, another $ReLU$ and a final affine transformation to logits.
  
@@ -159,8 +159,60 @@ The model, as described here, is trained and operates on a sentence basis. For f
 
 \section*{Results}
 
-introduce the test results, draw some conclusions
+The testing results for each model-language-translator tuple, representing the percentage of samples from the test dataset corresponding to each tuple for which the source \emph{language} was correctly recognized (we stress that the model was not tasked with recognizing the translator) are, as follows:
+
+\begin{itemize}
+	\item BERT:
+		\begin{itemize}
+		\item{arabic}:
+		\item{chinese}:
+		\item{indonesian}:
+		\item{japanese}:
+		\end{itemize}
+	\item POS-BERT:
+		\begin{itemize}
+		\item{arabic}:
+		\item{chinese}:
+		\item{indonesian}:
+		\item{japanese}:
+		\end{itemize}
+	\item SVM:
+		\begin{itemize}
+		\item{arabic}:
+		\item{chinese}:
+		\item{indonesian}:
+		\item{japanese}:
+		\end{itemize}
+	\item Dependency tree CNN (overall accuracy 59.4\%):
+		\begin{itemize}
+		\item{arabic} (overall accuracy 74\%): 
+		\begin{itemize}
+			\item Helsinki: 66\%
+			\item MBART: 82\%
+		\end{itemize}
+		\item{chinese} (overall accuracy 60.7\%): 
+		\begin{itemize}
+			\item Helsinki: 61.1\%
+			\item MBART: 60.2\%
+		\end{itemize}
+		\item{indonesian} (overall accuracy 85.8\%): 
+		\begin{itemize}
+			\item Helsinki: 87.3\%
+			\item MBART: 83.6\%
+		\end{itemize}
+		\item{japanese} (overall accuracy 16.7\%): 
+		\begin{itemize}
+			\item Staka: 19.4\%
+			\item MBART: 14.3\%
+		\end{itemize}
+
+
+		\end{itemize}
+\end{itemize}
+
+draw some conclusions
 for every language-translator pair, number of correctly/incorrectly classified paragraphs, if possible. also ofc everyone should report their own
+
 
 \section*{Conclusion}
 
@@ -178,35 +230,42 @@ for validation we maybe should have used different translators, so that we're ab
 
 \section*{Work distribution}
 
-I really hope I didn't make any mistakes in your names XD
 
 \begin{itemize}
-	\item Chih-Hsiang Hsu
+
+	\item Chih-Hsiang Hsu:
 	\begin{itemize}
-		\item todo
-		\item todo
+		\item Arabic language dataset part, POS-BERT model, and their respective sections in this report.
+		\item Reviewing related literature.
+		\item Improvements to scraping.
 	\end{itemize}
 	
 	\item Chung-Hao Liao
 	\begin{itemize}
-		\item todo
+		\item Chinese language dataset part, BERT model, and their respective sections in this report.
+		\item 
 	\end{itemize}
 	
 	\item Antoni Maciąg
 	\begin{itemize}
-		\item todo
+		\item Indonesian language dataset part, dependency tree CNN model, and their respective sections in this report.
+		\item Formulation of the task.
+		\item Reviewing related literature.
+		\item Initial versions of the scripts for scraping, and translating with the MBART, Helsinki and Google translators.
+		\item Writing this report, except for the sections related to specific dataset parts and models.
 	\end{itemize}
 	
 	\item Jen-Tse Wei
 	\begin{itemize}
-		\item todo
+		\item Japanese language dataset part, SVM model, and their respective sections in this report.
+		\item
 	\end{itemize}
 	
-	\item Each member:
-	\begin{itemize}
-		\item Writing the part of the report about their respective dataset part and model.
-	\end{itemize}
+
+	
 \end{itemize}
+
+\newpage
 
 
 \bibliographystyle{ieeetr}
