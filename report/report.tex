@@ -68,7 +68,7 @@
 
 \section*{Source language detection}
 
-Although there is some preexisting work on tasks similar to the one we chose for the assignment, it is not a standard NLP task and to the best of our knowledge, there is no work with exactly the same problem formulation. The formulation is: given a text machine-translated into English from a known set of source languages, detect the source language. We will refer to the problem as Source Language Detection (SLD).
+Although there is some preexisting work on tasks very similar to the one we chose for the assignment, it is not a standard NLP task and to the best of our knowledge, there is no work with exactly the same problem formulation. The formulation is: given a text machine-translated into English from a known set of source languages, detect the source language. We will refer to the problem as Source Language Detection (SLD).
 
 We are motivated by the following: in human translation, clues as to the original language in the form of both syntactic and semantic information tend to get unconsciously carried over to the translated text \cite{literary}, making it possible to detect the original language. We are curious if that is also the case for currect state-of-the-art models for Machine Translation, and if so, what kinds of models will make SLD possible and what features of the translated text will be salient for detection. If the translation models are good enough, our obtained accuracy should not be considerably higher than random guessing.
 
@@ -81,7 +81,7 @@ The closest work to what we attempted to do was done by Nguyen-Son et al. \cite{
 
 Kurokawa et al. \cite{canada} create a model based on Support Vector Machines (SVM), capable of determining whether a text was originally English, or translated from French. They find that certain n-grams were more frequent in translated text (semantic information), but syntactic features turn out ot be powerful as well, for example there is a "higher presence of the definite article \emph{the} and prepositions in text translated from French", and "good classification accuracy was obtained even when texts were reduced to part-of-speech sequences".
 
-Lynch \& Vogel \cite{literary}, similarly, construct an SVM based on document-level features such as number of nouns, average sentence length, word unigrams, part-of-speech (POS) bigrams. Proper names are excluded from word unigrams, as "any character or place-names could unambiguously distinguish a text". Again, the word \emph{towards} turns out to be particularly common in translation from German, and \emph{that's} (rather than \emph{that is}) - in translations from Russian. The document-level features suggest it might be easier to detect the source language of a text if it is longer, which makes such features more reliable (reduces their variance).
+Lynch \& Vogel \cite{literary}, similarly, construct an SVM based on document-level features such as the number of nouns, average sentence length, word unigrams, part-of-speech (POS) bigrams. Proper names are excluded from word unigrams, as "any character or place-names could unambiguously distinguish a text". Again, the word \emph{towards} turns out to be particularly common in translation from German, and \emph{that's} (rather than \emph{that is}) - in translations from Russian. The document-level features suggest it might be easier to detect the source language of a text if it is longer, which makes such features more reliable (reduces their variance).
 
 \section*{Approach}
 
@@ -115,7 +115,7 @@ The final dataset composition for each language:
 		\item Train set: 1600 chunks translated by Google Translate, the \href{https://huggingface.co/Helsinki-NLP/opus-mt-id-en}{Helsinki-NLP/opus-mt-id-en} translator, and the \href{https://huggingface.co/facebook/mbart-large-50-many-to-one-mmt}{Facebook large multilingual BART} translator each; 252 by the \href{https://www.deepl.com/en/translator}{DeepL} translator; 995  by the Microsoft translator API; and 330 by \href{https://libretranslate.com/}{LibreTranslate}; making 6377 chunks in total,
 		\item Test set: 350 chunks translated by the same Helsinki and MBART translators each - 700 chunks in total.
 	\end{itemize}
-	These numbers were gathered before removing duplicate paragraphs, so the final numbers are, as mentioned, slightly different. In addition, due to maximum length limitations in the Helsinki translator, sentences with length (after tokenization) greater than 256 were removed.
+	These numbers were gathered before removing duplicate chunks, so the final numbers are, as mentioned, slightly different. In addition, due to maximum length limitations in the Helsinki translator, sentences with length (after tokenization) greater than 256 were removed.
 
 	\item Japanese:
 \end{itemize}
@@ -240,13 +240,13 @@ for validation we maybe should have used different translators, so that we're ab
 		\item Improvements to scraping.
 	\end{itemize}
 	
-	\item Chung-Hao Liao
+	\item Chung-Hao Liao:
 	\begin{itemize}
 		\item Chinese language dataset part, BERT model, and their respective sections in this report.
 		\item 
 	\end{itemize}
 	
-	\item Antoni Maciąg
+	\item Antoni Maciąg:
 	\begin{itemize}
 		\item Indonesian language dataset part, dependency tree CNN model, and their respective sections in this report.
 		\item Formulation of the task.
@@ -255,7 +255,7 @@ for validation we maybe should have used different translators, so that we're ab
 		\item Writing this report, except for the sections related to specific dataset parts and models.
 	\end{itemize}
 	
-	\item Jen-Tse Wei
+	\item Jen-Tse Wei:
 	\begin{itemize}
 		\item Japanese language dataset part, SVM model, and their respective sections in this report.
 		\item
