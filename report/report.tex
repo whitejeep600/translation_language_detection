@@ -109,6 +109,10 @@ The final dataset composition for each language:
 
 \begin{itemize}
 	\item Arabic:
+	\begin{itemize}
+            \item Train set: 1600 translated chunks from each Google Translate, the \href{https://huggingface.co/Helsinki-NLP/opus-mt-ar-en}{Helsinki-NLP/opus-mt-ar-en} translator, and the fine-tuned one \href{https://huggingface.co/Shularp/krirk-finetuned-Helsinki-NLP_opus-mt-ar-en}{Shularp/krirk-finetuned-Helsinki-NLP-opus-mt-ar-en}, \href{https://huggingface.co/facebook/mbart-large-50-many-to-one-mmt}{Facebook large multilingual BART} translator.
+            \item Test set: 350 translated chunks from the same Helsinki and MBART translators each with 700 chunks in total
+        \end{itemize}
 	\item Chinese:
 	\item Indonesian:
 	\begin{itemize}
@@ -118,6 +122,10 @@ The final dataset composition for each language:
 	These numbers were gathered before removing duplicate chunks, so the final numbers are, as mentioned, slightly different. In addition, due to maximum length limitations in the Helsinki translator, sentences with length (after tokenization) greater than 256 were removed.
 
 	\item Japanese:
+	\begin{itemize}
+            \item Train set: 1355 chunks translated by Google Translate, 2495 chunks from \href{https://huggingface.co/staka/fugumt-ja-en}{staka/fugumt-ja-en}, 1043 chunks from \href{https://huggingface.co/facebook/mbart-large-50-many-to-one-mmt}{Facebook large multilingual BART} and 1649 chunks from \href{https://huggingface.co/Helsinki-NLP/opus-mt-ja-en}{Helsinki-NLP/opus-mt-ja-en}. Make 6542 chunks in total.
+            \item Test set: 350 chunks translated from \href{https://huggingface.co/staka/fugumt-ja-en}{staka/fugumt-ja-en} and 350 chunks from \href{https://huggingface.co/facebook/mbart-large-50-many-to-one-mmt}{Facebook large multilingual BART} with 700 chunks in total.
+        \end{itemize}
 \end{itemize}
 
 \subsection*{Models}
@@ -135,9 +143,97 @@ More precise descriptions of each model are provided in the sections below.
 
 \subsubsection*{Bert}
 
-\subsubsection*{RoBERTA on POS tags}
+\subsubsection*{Model on POS sequence}
+Since the languages we chose are very different in grammar structure, we hope to identify the source language from the part-of-speech (POS) feature. This method is considered to be effective in \cite{canada}. Their SVM model benefits from the POS feature and achieves satisfying accuracy on detecting translated text.
+
+We first transform our dataset to word-level POS sequences by \href{https://huggingface.co/vblagoje/bert-english-uncased-finetuned-pos}{vblagoje/bert-english-uncased-finetuned-pos}, which is fine-tuned BERT on English POS tagging task. For example, a sentence "I want to eat an apple." will become a sequence "PRON VERB PART VERB DET NOUN PUNCT". There are 16 categories for POS tagging with an extra tag "X" for those unable to be recognized. Then we would like to see if this sequence can give enough information to source language detection.
+
+This task can be formulated as text classification. We come up with using a pre-trained RoBERTa-based model on text sentiment classification. After several try, we find that the results are all barely better than guessing. The reason is mainly on the size of the model. Since there are only about 20 categories of POS tagging, the model seems to be too large for dealing with this and rapidly overfits the training set.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=6cm]{model_pos.png}
+    \caption{Model architecture on POS feature.}
+    \label{fig:model_pos}
+\end{figure}
+
+Thus we construct a smaller transformer-based model. The model can be split into three parts: a word-to-vector encoder, a 4-layer transformer, and a classification head as shown in Figure \ref{fig:model_pos}. We truncate and pad the POS sequence into fixed length of 256 words. Then one-hot encoded it into an 18 dimensional vector sequence $V \in \mathbb{R}^{256 \times 18}$. Next, we use a multi-layer perceptron to encode the sequence to $p$ dimensional embedding and get an embedded sequence $\hat{V} \in \mathbb{R}^{256 \times p}$. Then the embedded sequence becomes probabilities on the 4 source language type after passing through the 4-layer transformer and the classification head. The result is shown in Table \ref{fig:accuracy_pos}.
+
+\begin{table}
+    \begin{center}
+        \begin{tabular}{c | c c}
+            Embedding dim. $p$ & Accuracy (\%) & Parameters \\
+            \hline
+            16 & 56.6 & 14229 \\
+            64 & 57.2 & 160581 \\
+            256 & 53.4 & 2312709 \\
+        \end{tabular}
+        \caption{Accuracy on test set for different model structure.}
+        \label{fig:accuracy_pos}
+    \end{center}
+\end{table}
+
+We may see that a model with small amount of parameters can do source language detection well. Also, the POS feature provides enough information and allows our model to achieve a satisfying accuracy on this task.
 
 \subsubsection*{SVM}
+Inspired by \cite{literary}, we think that there are some clues hidden in the documents. Therefore, we mimic 14 documents-level features and transform these features into vectors. These 14 documents-level features are listed in Table \ref{fig:docs-level_features}. After doing the data pre-processing, we have a vector consist of 14 elements for each paragraph. We create a linear kernel SVM to do the classification.
+
+Besides, we set up different parameter like constant C in linear kernel. Constant C means that how much the margin size of hyperplane will be set up. If the constant C becomes smaller, the margin size becomes larger which means that it will be easier to misclassify data. Table \ref{fig:accuracy_constant_c} lists the influences of constant C in linear kernel. However, the larger constant C will increase the calculation time. Therefore, it is a trade-off between constant C and training time.
+
+Additionally, we use cross-validation technique to avoid of overfitting. The result is listed in Table \ref{fig:accuracy_cv}. We can find out there is a little improvement in accuracy.
+
+\begin{table}
+    \begin{center}     
+        \begin{tabular}{c | c}
+            C & Accuracy (\%) \\
+            \hline
+            1 & 48.95 \\
+            2 & 50.14 \\
+            5 & 50.42 \\
+        \end{tabular}
+        \caption{The accuracy for different constant C}
+        \label{fig:accuracy_constant_c}
+    \end{center}
+\end{table}
+
+\begin{table}
+    \begin{center}     
+        \begin{tabular}{c | c}
+            C & Accuracy (\%) \\
+            \hline
+            1 & 50.97 \\
+            2 & 51.75 \\
+            5 & 52.26 \\
+        \end{tabular}
+        \caption{The accuracy with 10-folds cross validation}
+        \label{fig:accuracy_cv}
+    \end{center}
+\end{table}
+
+\begin{table*}
+    \begin{center}     
+        \begin{tabular}{c | c | c }
+            Number & Documents-level feature & Description \\
+            \hline
+            1 & Avgsent & Average length of sentences \\
+            2 & ARI & Readability metric \\
+            3 & CLI & Readability mertic \\
+            4 & word ratio & word-type word(without numerals and others) : total words \\
+            5 & num ratio & numerals : total words \\
+            6 & verb ratio & verbs : total words \\
+            7 & noun ratio & nouns : total words \\
+            8 & pronoun ratio & pronouns : total words \\
+            9 & prep ratio & prepositions : total words \\
+            10 & conj ratio & conjunctions : total words \\
+            11 & open ratio & open-class words : total words \\
+            12 & closed ratio & closed-class words: total words \\
+            13 & lemma ratio & lemmas : total words \\
+            14 & grammlex & open-class words : closed-class words \\
+        \end{tabular}
+        \caption{Description of each documents-level feature.}
+        \label{fig:docs-level_features}
+    \end{center}
+\end{table*}
 
 \subsubsection*{Dependency tree CNN}
 
@@ -169,20 +265,55 @@ The testing results for each model-language-translator tuple, representing the p
 		\item{indonesian}:
 		\item{japanese}:
 		\end{itemize}
-	\item POS-BERT:
+	\item POS (overall accuracy 57.2\%):
 		\begin{itemize}
-		\item{arabic}:
-		\item{chinese}:
-		\item{indonesian}:
-		\item{japanese}:
-		\end{itemize}
-	\item SVM:
+		\item{arabic} (overall accuracy 77.6\%):
 		\begin{itemize}
-		\item{arabic}:
-		\item{chinese}:
-		\item{indonesian}:
-		\item{japanese}:
+			\item Helsinki: 78.8\%
+			\item MBART: 76.4\%
 		\end{itemize}
+  
+		\item{chinese} (overall accuracy 59.6\%):
+		\begin{itemize}
+			\item Helsinki: 58.0\%
+			\item MBART: 61.1\%
+		\end{itemize}
+  
+		\item{indonesian} (overall accuracy 44.6\%):
+		\begin{itemize}
+			\item Helsinki: 46.7\%
+			\item MBART: 42.5\%
+		\end{itemize}
+  
+		\item{japanese} (overall accuracy 47.1\%):
+		\begin{itemize}
+			\item Staka: 53.1\%
+			\item MBART: 41.1\%
+		\end{itemize}
+		\end{itemize}
+	\item SVM (overall accuracy 50.14\%):
+		\begin{itemize}
+		\item{arabic (overall accuracy 57.57\%)}:
+  		\begin{itemize}
+			\item Helsinki: 50.99\%
+			\item MBART: 64.27\%
+		\end{itemize}
+		\item{chinese (overall accuracy 57.94\%)}:
+            \begin{itemize}
+			\item Helsinki: 55.58\%
+			\item MBART: 60.37\%
+		\end{itemize}
+		\item{indonesian (overall accuracy 50.65\%)}:
+            \begin{itemize}
+			\item Helsinki: 51.00\%
+			\item MBART: 50.29\%
+		\end{itemize}
+            \item{japanese (overall accuracy 30.00\%)}:
+            \begin{itemize}
+			\item Staka: 39.43\%
+			\item MBART: 20.57\%
+		\end{itemize}
+            \end{itemize}
 	\item Dependency tree CNN (overall accuracy 59.4\%):
 		\begin{itemize}
 		\item{arabic} (overall accuracy 74\%): 
@@ -248,8 +379,8 @@ for validation we maybe should have used different translators, so that we're ab
 	
 	\item Antoni Maciąg:
 	\begin{itemize}
-		\item Indonesian language dataset part, dependency tree CNN model, and their respective sections in this report.
 		\item Formulation of the task.
+		\item Indonesian language dataset part, dependency tree CNN model, and their respective sections in this report.
 		\item Reviewing related literature.
 		\item Initial versions of the scripts for scraping, and translating with the MBART, Helsinki and Google translators.
 		\item Writing this report, except for the sections related to specific dataset parts and models.
@@ -258,7 +389,7 @@ for validation we maybe should have used different translators, so that we're ab
 	\item Jen-Tse Wei:
 	\begin{itemize}
 		\item Japanese language dataset part, SVM model, and their respective sections in this report.
-		\item
+		\item Reviewing related literature.
 	\end{itemize}
 	
 
