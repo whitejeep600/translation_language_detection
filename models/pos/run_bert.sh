@@ -1,0 +1,1 @@
+python train__.py --model_name_or_path bert-base-uncased --train_file data/train.json --validation_file data/test.json --ignore_mismatched_sizes --learning_rate 4e-4 --weight_decay 0.1 --num_warmup_steps 100 --num_train_epochs 5 --per_device_eval_batch_size 16 --output_dir checkpoint/exp2/
