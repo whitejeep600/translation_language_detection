@@ -1,0 +1,98 @@
+{
+  "version": "1.0",
+  "truncation": null,
+  "padding": null,
+  "added_tokens": [
+    {
+      "id": 0,
+      "content": "<s>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 1,
+      "content": "</s>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 2,
+      "content": "<unk>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 3,
+      "content": "<pad>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 4,
+      "content": "<mask>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    }
+  ],
+  "normalizer": null,
+  "pre_tokenizer": {
+    "type": "Whitespace"
+  },
+  "post_processor": {
+    "type": "RobertaProcessing",
+    "sep": [
+      "</s>",
+      1
+    ],
+    "cls": [
+      "<s>",
+      0
+    ],
+    "trim_offsets": true,
+    "add_prefix_space": false
+  },
+  "decoder": null,
+  "model": {
+    "type": "WordLevel",
+    "vocab": {
+      "<s>": 0,
+      "</s>": 1,
+      "<unk>": 2,
+      "<pad>": 3,
+      "<mask>": 4,
+      "NOUN": 5,
+      "PUNCT": 6,
+      "ADP": 7,
+      "DET": 8,
+      "PROPN": 9,
+      "VERB": 10,
+      "ADJ": 11,
+      "AUX": 12,
+      "CCONJ": 13,
+      "PRON": 14,
+      "NUM": 15,
+      "ADV": 16,
+      "PART": 17,
+      "SCONJ": 18,
+      "SYM": 19,
+      "X": 20,
+      "INTJ": 21
+    },
+    "unk_token": "<unk>"
+  }
+}
