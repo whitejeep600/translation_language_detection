@@ -192,6 +192,10 @@ def parse_args():
         "--debug",
         action="store_true",
     )
+    parser.add_argument(
+        "--do_train",
+        action="store_true",
+    )
     args = parser.parse_args()
 
     # Sanity checks
@@ -515,38 +519,39 @@ def main():
             resume_step -= starting_epoch * len(train_dataloader)
 
     for epoch in range(starting_epoch, args.num_train_epochs):
-        model.train()
-        if args.with_tracking:
-            total_loss = 0
-        for step, batch in enumerate(train_dataloader):
-            # We need to skip steps until we reach the resumed step
-            if args.resume_from_checkpoint and epoch == starting_epoch:
-                if resume_step is not None and step < resume_step:
-                    completed_steps += 1
-                    continue
-            outputs = model(**batch)
-            loss = outputs.loss
-            # We keep track of the loss at each epoch
+        if args.do_train:
+            model.train()
             if args.with_tracking:
-                total_loss += loss.detach().float()
-            loss = loss / args.gradient_accumulation_steps
-            accelerator.backward(loss)
-            if step % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
-                optimizer.step()
-                lr_scheduler.step()
-                optimizer.zero_grad()
-                progress_bar.update(1)
-                completed_steps += 1
+                total_loss = 0
+            for step, batch in enumerate(train_dataloader):
+                # We need to skip steps until we reach the resumed step
+                if args.resume_from_checkpoint and epoch == starting_epoch:
+                    if resume_step is not None and step < resume_step:
+                        completed_steps += 1
+                        continue
+                outputs = model(**batch)
+                loss = outputs.loss
+                # We keep track of the loss at each epoch
+                if args.with_tracking:
+                    total_loss += loss.detach().float()
+                loss = loss / args.gradient_accumulation_steps
+                accelerator.backward(loss)
+                if step % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
+                    optimizer.step()
+                    lr_scheduler.step()
+                    optimizer.zero_grad()
+                    progress_bar.update(1)
+                    completed_steps += 1
 
-            if isinstance(checkpointing_steps, int):
-                if completed_steps % checkpointing_steps == 0:
-                    output_dir = f"step_{completed_steps }"
-                    if args.output_dir is not None:
-                        output_dir = os.path.join(args.output_dir, output_dir)
-                    accelerator.save_state(output_dir)
+                if isinstance(checkpointing_steps, int):
+                    if completed_steps % checkpointing_steps == 0:
+                        output_dir = f"step_{completed_steps }"
+                        if args.output_dir is not None:
+                            output_dir = os.path.join(args.output_dir, output_dir)
+                        accelerator.save_state(output_dir)
 
-            if completed_steps >= args.max_train_steps:
-                break
+                if completed_steps >= args.max_train_steps:
+                    break
 
         model.eval()
         logger.info(model.config.label2id)
@@ -554,9 +559,17 @@ def main():
         samples_seen = 0
         predictions_for_all_languages = {}
         predictions_for_all_languages['arabic'] = []
+        #predictions_for_all_languages['arabic']['mbart'] = []
+        #predictions_for_all_languages['arabic']['helsinki'] = []
         predictions_for_all_languages['chinese'] = []
+        #predictions_for_all_languages['chinese']['mbart'] = []
+        #predictions_for_all_languages['chinese']['helsinki'] = []
         predictions_for_all_languages['indonesian'] = []
+        #predictions_for_all_languages['indonesian']['helsinki'] = []
+        #predictions_for_all_languages['indonesian']['mbart'] = []
         predictions_for_all_languages['japanese'] = []
+        #predictions_for_all_languages['japanese']['staka'] = []
+        #predictions_for_all_languages['japanese']['mbart'] = []
         for step, batch in enumerate(eval_dataloader):
             with torch.no_grad():
                 outputs = model(**batch)
@@ -583,7 +596,8 @@ def main():
         for language in ['arabic','chinese','indonesian','japanese']:
             correct_count = predictions_for_all_languages[language].count(model.config.label2id[language])
             total_data_size = len(predictions_for_all_languages[language])
-            logger.info(f"epoch {epoch}: accuracy for {language} is {correct_count/total_data_size}")
+            if total_data_size>0:
+                logger.info(f"epoch {epoch}: accuracy for {language} is {correct_count/total_data_size}")
         logger.info(f"epoch {epoch}: {eval_metric}")
 
         if args.with_tracking:
