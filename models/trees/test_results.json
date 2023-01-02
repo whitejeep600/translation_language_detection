@@ -1,0 +1,42 @@
+{
+    "arabic": {
+        "Helsinki-NLP/opus-mt-ar-en": {
+            "correct": 234,
+            "incorrect": 119
+        },
+        "facebook/mbart-large-50-many-to-one-mmt": {
+            "correct": 283,
+            "incorrect": 64
+        }
+    },
+    "chinese": {
+        "helsinki": {
+            "correct": 340,
+            "incorrect": 216
+        },
+        "mBART": {
+            "correct": 325,
+            "incorrect": 215
+        }
+    },
+    "indonesian": {
+        "helsinki": {
+            "correct": 303,
+            "incorrect": 44
+        },
+        "mbart": {
+            "correct": 291,
+            "incorrect": 57
+        }
+    },
+    "japanese": {
+        "staka": {
+            "correct": 68,
+            "incorrect": 282
+        },
+        "mbart": {
+            "correct": 50,
+            "incorrect": 300
+        }
+    }
+}
