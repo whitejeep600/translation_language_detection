@@ -63,8 +63,9 @@
 \begin{document}
 
 \maketitle
-
 \section*{Abstract}
+
+We investigate the possibility of detecting the source language of text machine-translated from Arabic, Chinese, Indonesian and Japanese. We create four different models, based on vanilla BERT, BERT on part-of-speech tags, SVM document-level features, and a neural network on dependency trees, respectively. The experiments show that relatively small models based on syntactic information only can achieve accuracies close to 60\%.
 
 \section*{Source language detection}
 
@@ -77,11 +78,7 @@ In addition, we are curious if there is a difference between translation models 
 
 \section*{Related work}
 
-The closest work to what we attempted to do was done by Nguyen-Son et al. \cite{roundtrip} who detect, for a given English text, whether it was translated or orignally written in English, and if translated, the correct one out of a set of possible source language - translator tuples. The possible languages are Russian, German and Japanese. They use the round-translation method, utilizing the phenomenon by which, while repeatedly translating a text back and forth between two languages, each round-trip changes the text less than the previous one. Thus, given an English text $T$ which we know was translated from either Russian or German, if we generate round-trip $En \rightarrow Ru \rightarrow En$ and $En \rightarrow Ge \rightarrow En$ translations of the text, the similarity to $T$ will be higher for the translation through the language that was the original language of $T$. Therefore, the authors generate round-trip translations of a given text through a number of languages and translators, and choose the translation with the highest similarity to $T$. Its associated language-translator tuple has its own subclassifier, which is further used to determine if the text was translated or originally English. The authors prove the ability of such a model to generalize (i.e. still detect the source language) to texts translated by translators not included in training. However, a shortcoming of such an approach is that it is computationally expensive, both while training (due to training a separate subclassifier for each language-translator pair), and during inference (due to generating multiple round-trip translations).
-
-Kurokawa et al. \cite{canada} create a model based on Support Vector Machines (SVM), capable of determining whether a text was originally English, or translated from French. They find that certain n-grams were more frequent in translated text (semantic information), but syntactic features turn out ot be powerful as well, for example there is a "higher presence of the definite article \emph{the} and prepositions in text translated from French", and "good classification accuracy was obtained even when texts were reduced to part-of-speech sequences".
-
-Lynch \& Vogel \cite{literary}, similarly, construct an SVM based on document-level features such as the number of nouns, average sentence length, word unigrams, part-of-speech (POS) bigrams. Proper names are excluded from word unigrams, as "any character or place-names could unambiguously distinguish a text". Again, the word \emph{towards} turns out to be particularly common in translation from German, and \emph{that's} (rather than \emph{that is}) - in translations from Russian. The document-level features suggest it might be easier to detect the source language of a text if it is longer, which makes such features more reliable (reduces their variance).
+The closest work to what we attempted to do was done by Nguyen-Son et al. \cite{roundtrip} who detect, for a given English text, whether it was translated or orignally written in English, and if translated, the correct one out of a set of possible source language - translator tuples. The possible languages are Russian, German and Japanese. They use the round-translation method, utilizing the phenomenon by which, while repeatedly translating a text back and forth between two languages, each round-trip changes the text less than the previous one. Thus, given an English text $T$ which we know was translated from either Russian or German, if we generate round-trip $En \rightarrow Ru \rightarrow En$ and $En \rightarrow Ge \rightarrow En$ translations of the text, the similarity to $T$ will be higher for the translation through the language that was the original language of $T$. Therefore, the authors generate round-trip translations of a given text through a number of languages and translators, and choose the translation with the highest similarity to $T$. Its associated language-translator tuple has its own subclassifier, which is further used to determine if the text was translated or originally English. The authors prove the ability of such a model to generalize (i.e. still detect the source language) to texts translated by translators not included in training. However, a shortcoming of such an approach is that it is computationally expensive, both while training (due to training a separate subclassifier for each language-translator pair), and during inference (due to generating multiple round-trip translations).\\ \quad Kurokawa et al. \cite{canada} create a model based on Support Vector Machines (SVM), capable of determining whether a text was originally English, or translated from French. They find that certain n-grams were more frequent in translated text (semantic information), but syntactic features turn out ot be powerful as well, for example there is a "higher presence of the definite article \emph{the} and prepositions in text translated from French", and "good classification accuracy was obtained even when texts were reduced to part-of-speech sequences".\\ Lynch \& Vogel \cite{literary}, similarly, construct an SVM based on document-level features such as the number of nouns, average sentence length, word unigrams, part-of-speech (POS) bigrams. Proper names are excluded from word unigrams, as "any character or place-names could unambiguously distinguish a text". Again, the word \emph{towards} turns out to be particularly common in translation from German, and \emph{that's} (rather than \emph{that is}) - in translations from Russian. The document-level features suggest it might be easier to detect the source language of a text if it is longer, which makes such features more reliable (reduces their variance).
 
 \section*{Approach}
 
@@ -113,7 +110,11 @@ The final dataset composition for each language:
             \item Train set: 1600 translated chunks from each Google Translate, the \href{https://huggingface.co/Helsinki-NLP/opus-mt-ar-en}{Helsinki-NLP/opus-mt-ar-en} translator, and the fine-tuned one \href{https://huggingface.co/Shularp/krirk-finetuned-Helsinki-NLP_opus-mt-ar-en}{Shularp/krirk-finetuned-Helsinki-NLP-opus-mt-ar-en}, \href{https://huggingface.co/facebook/mbart-large-50-many-to-one-mmt}{Facebook large multilingual BART} translator.
             \item Test set: 350 translated chunks from the same Helsinki and MBART translators each with 700 chunks in total
         \end{itemize}
-	\item Chinese:
+		\item Chinese:
+        \begin{itemize}
+            \item Train set: 2700 translated chunks from Google Translate, 2700 chunks from \href{https://huggingface.co/Helsinki-NLP/opus-mt-zh-en}{Helsinki-NLP/opus-mt-zh-en} translator, and 2700 chunks from \href{https://huggingface.co/facebook/mbart-large-50-many-to-one-mmt}{Face book large multilingual BART} translator.
+            \item Test set: 350 chunks from \href{https://huggingface.co/Helsinki-NLP/opus-mt-zh-en}{Helsinki-NLP/opus-mt-zh-en} translator and 350 chunks from \href{https://huggingface.co/facebook/mbart-large-50-many-to-one-mmt}{Face book large multilingual BART} translator.
+        \end{itemize}
 	\item Indonesian:
 	\begin{itemize}
 		\item Train set: 1600 chunks translated by Google Translate, the \href{https://huggingface.co/Helsinki-NLP/opus-mt-id-en}{Helsinki-NLP/opus-mt-id-en} translator, and the \href{https://huggingface.co/facebook/mbart-large-50-many-to-one-mmt}{Facebook large multilingual BART} translator each; 252 by the \href{https://www.deepl.com/en/translator}{DeepL} translator; 995  by the Microsoft translator API; and 330 by \href{https://libretranslate.com/}{LibreTranslate}; making 6377 chunks in total,
@@ -142,6 +143,38 @@ Four models have been created:
 More precise descriptions of each model are provided in the sections below.
 
 \subsubsection*{Bert}
+
+First, we try a straightforward method, fine-tuning a Bert pre-trained model on this classification task. The architecture of the model is shown in Figure \ref{fig:bert_model_architecture}.
+The bert model takes tokenized paragraph as inputs, and the pooled output of it is fed into a linear model to predict the class. 
+
+We fine-tuned two pre-trained models, which are \href{https://huggingface.co/bert-base-cased}{bert-base-cased} and  \href{https://huggingface.co/cardiffnlp/twitter-roberta-base-sentiment}{twitter-roberta-base-sentiment}. The pre-training data of bert-base-cased includes BooksCorpus and English Wikipedia, which may has similar document properties to the training and test data we collect. On the other hands, the model twitter-roberta-base-sentiment is pre-trained on a lot of tweets, which is quite different from the training data and test data we collect.
+
+The result has shown that both models reached more than $90\%$ overall accuracy on our test data collected from wikipedia. However, the models take original text as inputs, which means that they can learn not only grammatical or structural features but also subjects related to training data in each language. Hence, we can not confirm that the models are globally great solely from their performance on wikipedia test data.
+
+To verify whether the models learn the structural features related to original language or the subjects of our training data, we collect another test dataset. The new test data is collected from 80 news article in different languages translated by Google translator. The performance of both models on new test data dropped drastically. Bert-base-cased gets $63.3\%$ of accuracy, and twitter-roberta-base gets $54.4\%$ of accuracy. However, the accuracy is still much higher than that of random guessing. Hence, we can conclude that the Bert model is able to grab some of the structural of grammatical features related to original language. In addition, the performance of bert-base-cased is much better than that of twitter-bert-cased, which may result from their different pre-training data. The overall accuracy of both models are shown in Table \ref{fig:accuracy_bert}.
+
+\begin{table}
+    \begin{center}
+        \begin{tabular}{c | c c}
+            Pre-trained & Accuracy & Accuracy \\ model & on wikipedia & on news \\ & test data (\%) & test data (\%) \\
+            \hline
+            Bert-base-cased & 95.3 & 63.3 \\
+            Twitter-Roberta-base & 94.7 & 54.4 \\
+        \end{tabular}
+        \caption{Accuracy for different pre-trained model.}
+        \label{fig:accuracy_bert}
+    \end{center}
+\end{table}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=6cm]{bert_model_architecture.png}
+    \caption{Bert model architecture.}
+    \label{fig:bert_model_architecture}
+\end{figure}
+
+
 
 \subsubsection*{Model on POS sequence}
 Since the languages we chose are very different in grammar structure, we hope to identify the source language from the part-of-speech (POS) feature. This method is considered to be effective in \cite{canada}. Their SVM model benefits from the POS feature and achieves satisfying accuracy on detecting translated text.
@@ -258,12 +291,28 @@ The model, as described here, is trained and operates on a sentence basis. For f
 The testing results for each model-language-translator tuple, representing the percentage of samples from the test dataset corresponding to each tuple for which the source \emph{language} was correctly recognized (we stress that the model was not tasked with recognizing the translator) are, as follows:
 
 \begin{itemize}
-	\item BERT:
+	\item BERT: (overall accuracy 95.3\%, $63.3\%$ on smaller dataset as described above)
 		\begin{itemize}
-		\item{arabic}:
-		\item{chinese}:
-		\item{indonesian}:
-		\item{japanese}:
+		\item{arabic} (overall accuracy 98.1\%):
+            \begin{itemize}
+                \item Helsinki: 99.4\%
+                \item MBART: 96.8\%
+            \end{itemize}
+		\item{chinese} (overall accuracy 95.0\%):
+            \begin{itemize}
+                \item Helsinki: 95.7\%
+                \item MBART: 94.3\%
+            \end{itemize}
+		\item{indonesian} (overall accuracy 95.7\%):
+            \begin{itemize}
+                \item Helsinki: 95.7\%
+                \item MBART: 95.7\%
+            \end{itemize}
+		\item{japanese} (overall accuracy 92.6\%):
+            \begin{itemize}
+                \item Staka: 93.1\%
+                \item MBART: 92.0\%
+            \end{itemize}
 		\end{itemize}
 	\item POS (overall accuracy 57.2\%):
 		\begin{itemize}
@@ -341,22 +390,24 @@ The testing results for each model-language-translator tuple, representing the p
 		\end{itemize}
 \end{itemize}
 
-draw some conclusions
-for every language-translator pair, number of correctly/incorrectly classified paragraphs, if possible. also ofc everyone should report their own
+Aside from the BERT model when tested on the original dataset, the results are not dramatically different between the models, with accuracies between 50\% and 60\% for the POS, SVM, and D-CNN models, and 63\% for the BERT model if testing on the smaller dataset. While this is a considerably worse result than that obtained in \cite{roundtrip}, we consider it acceptable, since it was achieved by fairly small models (e.g. 59.4\% for the D-CNN with 17220 parameters) at a task which can be challenging even for humans.
+
+Contrary to our expectations, there is no observable difference in detection accuracy between text translated by multilingual models and by non-multilingual ones.
+
+Some languages are recognized with better accuracy than others. In general, Arabic is relatively easy, while Japanese - relatively hard to recognize. Big differences between the models (e.g. D-CNN does well on Indonesian and poorly on Japanese, while POS does slightly better on Japanese than on Indonesian) suggest that an ensemble of these models, which we have not tried creating, would outperform each of them.
+
+Finally, the fact that BERT's accuracy highly depends on the dataset clearly shows that for tasks similar to ours, there is a serious risk of the results being falsified by the models learning the topic distribution in the dataset, rather than features of translated text.
 
 
 \section*{Conclusion}
 
-sum up, propose further work, acknowledge shortcomings
+We have shown that the syntactic features of text translated by SOTA Machine Translation models are enough to achieve a decent accuracy in detecting the text's original language, even with comparatively small models. Syntactic clues are enough, while not eliminating the possible influence of semantics is risky from the point of view of result veracity. While there are differences in accuracy between languages, the multilinguality of the translator does not seem to have a substantial impact.
 
-If it turns out our model is trash, it might be either because 1. It really is trash 2. current state-of-the-art translation models are just so good
+We have a few suggestions for future work related to this project. One of them would be to create a model ensemble like \cite{roundtrip}, selecting models particularly good for respective languages, although that would increase model size, especially with a growing number of test languages. An accuracy comparison to humans who speak the test languages would be interesting to see, for example comparing an ensemble to a group of professional translators of the test languages.
 
-maybe we should try it on some old translation model, worse than current SOTA
+To further investigate the role of syntax in detection, ablation studies could be conducted, for instance removing the parse-tree-based information from the D-CNN model.
 
-compare models reduced to POS and not to validate that the whole thing was not ruined by Christians (I mean there's still like 6000 mentions of "christian" in the arabic dataset xd)
-
-for validation we maybe should have used different translators, so that we're absolutely sure our model learned what text translated from Korean looks like, and didn't just learn what text translated by Google Translate looks like.
-
+One more shortcoming we would like to acknowledge is that we still included text translated by the same translators in the train and test datasets, creating a risk of the models learning the style of a particular translator rather than translation from a particular language. While this is mitigated by the fact that we used a few different models for the train set, the possibility that this falsified the results to some extent cannot be ruled out.
 
 
 \section*{Work distribution}
@@ -374,7 +425,6 @@ for validation we maybe should have used different translators, so that we're ab
 	\item Chung-Hao Liao:
 	\begin{itemize}
 		\item Chinese language dataset part, BERT model, and their respective sections in this report.
-		\item 
 	\end{itemize}
 	
 	\item Antoni Maciąg:
@@ -395,8 +445,6 @@ for validation we maybe should have used different translators, so that we're ab
 
 	
 \end{itemize}
-
-\newpage
 
 
 \bibliographystyle{ieeetr}
@@ -423,5 +471,7 @@ for validation we maybe should have used different translators, so that we're ab
 \bibitem{kgan}
    \href{https://arxiv.org/pdf/1609.03286.pdf
 }{Yun-Nung Chen, Dilek Hakkani-Tur, Gokan Tur, Asli Celikyilmaz, Jianfeng Gao, and Li Deng. Knowledge as a Teacher: Knowledge-Guided Structural Attention Networks, 2016}
+
+\end{thebibliography}
 
 \end{document}
